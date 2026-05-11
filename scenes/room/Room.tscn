@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/room/Room.gd" id="1_room_script"]
+
+[node name="Room" type="Node2D"]
+script = ExtResource("1_room_script")
+
+[node name="FloorLayer" type="Node2D" parent="."]
+
+[node name="WallLayer" type="Node2D" parent="."]
+
+[node name="FurnitureLayer" type="Node2D" parent="."]
+
+[node name="NPCLayer" type="Node2D" parent="."]
+
+[node name="PlayerLayer" type="Node2D" parent="."]
+
+[node name="SelectionLayer" type="Node2D" parent="."]

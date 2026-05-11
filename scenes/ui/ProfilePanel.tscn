@@ -1,0 +1,126 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/ProfilePanel.gd" id="1_profile_script"]
+
+[node name="ProfilePanel" type="CanvasLayer"]
+script = ExtResource("1_profile_script")
+
+[node name="Root" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Overlay" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.45)
+
+[node name="Card" type="PanelContainer" parent="Root"]
+custom_minimum_size = Vector2(420, 320)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -210.0
+offset_top = -160.0
+offset_right = 210.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Margin" type="MarginContainer" parent="Root/Card"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="Root/Card/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Root/Card/Margin/VBox"]
+layout_mode = 2
+text = "Perfil"
+horizontal_alignment = 1
+
+[node name="NameInput" type="LineEdit" parent="Root/Card/Margin/VBox"]
+layout_mode = 2
+max_length = 16
+placeholder_text = "Nombre"
+
+[node name="VariantLabel" type="Label" parent="Root/Card/Margin/VBox"]
+layout_mode = 2
+text = "Color de camisa"
+
+[node name="ColorButtons" type="HBoxContainer" parent="Root/Card/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DefaultButton" type="Button" parent="Root/Card/Margin/VBox/ColorButtons"]
+layout_mode = 2
+text = "default"
+
+[node name="BlueButton" type="Button" parent="Root/Card/Margin/VBox/ColorButtons"]
+layout_mode = 2
+text = "blue"
+
+[node name="GreenButton" type="Button" parent="Root/Card/Margin/VBox/ColorButtons"]
+layout_mode = 2
+text = "green"
+
+[node name="RedButton" type="Button" parent="Root/Card/Margin/VBox/ColorButtons"]
+layout_mode = 2
+text = "red"
+
+[node name="YellowButton" type="Button" parent="Root/Card/Margin/VBox/ColorButtons"]
+layout_mode = 2
+text = "yellow"
+
+[node name="PurpleButton" type="Button" parent="Root/Card/Margin/VBox/ColorButtons"]
+layout_mode = 2
+text = "purple"
+
+[node name="PreviewArea" type="Control" parent="Root/Card/Margin/VBox"]
+custom_minimum_size = Vector2(180, 120)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AvatarPreview" type="Sprite2D" parent="Root/Card/Margin/VBox/PreviewArea"]
+position = Vector2(194, 88)
+texture_filter = 1
+
+[node name="Buttons" type="HBoxContainer" parent="Root/Card/Margin/VBox"]
+layout_mode = 2
+alignment = 2
+theme_override_constants/separation = 8
+
+[node name="CancelButton" type="Button" parent="Root/Card/Margin/VBox/Buttons"]
+layout_mode = 2
+text = "Cancelar"
+
+[node name="SaveButton" type="Button" parent="Root/Card/Margin/VBox/Buttons"]
+layout_mode = 2
+text = "Guardar"
+
+[connection signal="pressed" from="Root/Card/Margin/VBox/ColorButtons/DefaultButton" to="." method="_on_variant_pressed" binds= ["default"]]
+[connection signal="pressed" from="Root/Card/Margin/VBox/ColorButtons/BlueButton" to="." method="_on_variant_pressed" binds= ["blue"]]
+[connection signal="pressed" from="Root/Card/Margin/VBox/ColorButtons/GreenButton" to="." method="_on_variant_pressed" binds= ["green"]]
+[connection signal="pressed" from="Root/Card/Margin/VBox/ColorButtons/RedButton" to="." method="_on_variant_pressed" binds= ["red"]]
+[connection signal="pressed" from="Root/Card/Margin/VBox/ColorButtons/YellowButton" to="." method="_on_variant_pressed" binds= ["yellow"]]
+[connection signal="pressed" from="Root/Card/Margin/VBox/ColorButtons/PurpleButton" to="." method="_on_variant_pressed" binds= ["purple"]]
+[connection signal="pressed" from="Root/Card/Margin/VBox/Buttons/CancelButton" to="." method="_on_cancel_button_pressed"]
+[connection signal="pressed" from="Root/Card/Margin/VBox/Buttons/SaveButton" to="." method="_on_save_button_pressed"]

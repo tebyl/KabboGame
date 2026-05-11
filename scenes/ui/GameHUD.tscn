@@ -1,0 +1,138 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/GameHUD.gd" id="1_hud_script"]
+
+[node name="GameHUD" type="CanvasLayer"]
+script = ExtResource("1_hud_script")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TopBar" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 44.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Root/TopBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Root/TopBar/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="RoomName" type="Label" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Mi Sala"
+vertical_alignment = 1
+
+[node name="PlayerName" type="Label" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+text = "Invitado"
+vertical_alignment = 1
+
+[node name="CoinsLabel" type="Label" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+text = "Monedas: 500"
+vertical_alignment = 1
+
+[node name="MenuButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+text = "Menu"
+
+[node name="DecorateButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+toggle_mode = true
+text = "Decora"
+
+[node name="RotateButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+text = "Rotar"
+
+[node name="DeleteButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+text = "Eliminar"
+
+[node name="InventoryButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+text = "Inventario"
+
+[node name="SaveButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+text = "Guardar"
+
+[node name="ProfileButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+text = "Perfil"
+
+[node name="ShopButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+text = "Tienda"
+
+[node name="RoomsButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+text = "Salas"
+
+[node name="HelpText" type="Label" parent="Root"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -36.0
+offset_right = 220.0
+offset_bottom = -12.0
+grow_vertical = 0
+text = "Click para caminar"
+
+[node name="SavedLabel" type="Label" parent="Root"]
+visible = false
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -120.0
+offset_top = 54.0
+offset_right = -12.0
+offset_bottom = 78.0
+grow_horizontal = 0
+text = "Guardado"
+horizontal_alignment = 2
+
+[node name="MessageLabel" type="Label" parent="Root"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -24.0
+offset_right = 150.0
+offset_bottom = 8.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Mensaje"
+horizontal_alignment = 1
+
+[connection signal="pressed" from="Root/TopBar/MarginContainer/HBoxContainer/RotateButton" to="." method="_on_rotate_button_pressed"]
+[connection signal="pressed" from="Root/TopBar/MarginContainer/HBoxContainer/DeleteButton" to="." method="_on_delete_button_pressed"]
+[connection signal="pressed" from="Root/TopBar/MarginContainer/HBoxContainer/InventoryButton" to="." method="_on_inventory_button_pressed"]
+[connection signal="pressed" from="Root/TopBar/MarginContainer/HBoxContainer/SaveButton" to="." method="_on_save_button_pressed"]
+[connection signal="pressed" from="Root/TopBar/MarginContainer/HBoxContainer/ProfileButton" to="." method="_on_profile_button_pressed"]
+[connection signal="pressed" from="Root/TopBar/MarginContainer/HBoxContainer/ShopButton" to="." method="_on_shop_button_pressed"]
+[connection signal="pressed" from="Root/TopBar/MarginContainer/HBoxContainer/RoomsButton" to="." method="_on_rooms_button_pressed"]

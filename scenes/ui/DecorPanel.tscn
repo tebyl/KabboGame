@@ -1,0 +1,81 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/DecorPanel.gd" id="1_decor_script"]
+
+[node name="DecorPanel" type="CanvasLayer"]
+visible = false
+script = ExtResource("1_decor_script")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -310.0
+offset_top = -210.0
+offset_right = -12.0
+offset_bottom = 210.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Margin" type="MarginContainer" parent="Root/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBox" type="VBoxContainer" parent="Root/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Decoracion"
+
+[node name="FloorTitle" type="Label" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Pisos"
+
+[node name="FloorList" type="GridContainer" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+columns = 2
+
+[node name="WallTitle" type="Label" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Paredes"
+
+[node name="WallList" type="GridContainer" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+columns = 2
+
+[node name="Tools" type="HBoxContainer" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="RotatePreview" type="Button" parent="Root/Panel/Margin/VBox/Tools"]
+layout_mode = 2
+text = "Rotar preview"
+
+[node name="CancelPreview" type="Button" parent="Root/Panel/Margin/VBox/Tools"]
+layout_mode = 2
+text = "Cancelar"
+
+[node name="Close" type="Button" parent="Root/Panel/Margin/VBox/Tools"]
+layout_mode = 2
+text = "Cerrar"
+
+[connection signal="pressed" from="Root/Panel/Margin/VBox/Tools/RotatePreview" to="." method="_on_rotate_preview_pressed"]
+[connection signal="pressed" from="Root/Panel/Margin/VBox/Tools/CancelPreview" to="." method="_on_cancel_preview_pressed"]
+[connection signal="pressed" from="Root/Panel/Margin/VBox/Tools/Close" to="." method="_on_close_pressed"]

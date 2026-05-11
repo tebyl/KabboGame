@@ -1,0 +1,92 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/ShopPanel.gd" id="1_shop_script"]
+
+[node name="ShopPanel" type="CanvasLayer"]
+script = ExtResource("1_shop_script")
+
+[node name="Root" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Overlay" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.45)
+
+[node name="Card" type="PanelContainer" parent="Root"]
+custom_minimum_size = Vector2(640, 430)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -215.0
+offset_right = 320.0
+offset_bottom = 215.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Margin" type="MarginContainer" parent="Root/Card"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="VBox" type="VBoxContainer" parent="Root/Card/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="Root/Card/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Root/Card/Margin/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Tienda"
+
+[node name="CoinsLabel" type="Label" parent="Root/Card/Margin/VBox/Header"]
+layout_mode = 2
+text = "Monedas: 500"
+
+[node name="CloseButton" type="Button" parent="Root/Card/Margin/VBox/Header"]
+layout_mode = 2
+text = "Cerrar"
+
+[node name="Body" type="HBoxContainer" parent="Root/Card/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="Categories" type="VBoxContainer" parent="Root/Card/Margin/VBox/Body"]
+layout_mode = 2
+custom_minimum_size = Vector2(140, 0)
+
+[node name="ItemsScroll" type="ScrollContainer" parent="Root/Card/Margin/VBox/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ItemsList" type="VBoxContainer" parent="Root/Card/Margin/VBox/Body/ItemsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[connection signal="pressed" from="Root/Card/Margin/VBox/Header/CloseButton" to="." method="_on_close_button_pressed"]

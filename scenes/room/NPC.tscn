@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/room/NPC.gd" id="1_npc_script"]
+[ext_resource type="PackedScene" path="res://scenes/room/SpeechBubble.tscn" id="2_speech_bubble"]
+
+[node name="NPC" type="Node2D"]
+script = ExtResource("1_npc_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
+
+[node name="NameLabel" type="Label" parent="."]
+offset_left = -42.0
+offset_top = -78.0
+offset_right = 42.0
+offset_bottom = -58.0
+text = "NPC"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SpeechBubble" parent="." instance=ExtResource("2_speech_bubble")]

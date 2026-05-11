@@ -1,0 +1,69 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/DecorInspectorPanel.gd" id="1_inspector_script"]
+
+[node name="DecorInspectorPanel" type="CanvasLayer"]
+visible = false
+script = ExtResource("1_inspector_script")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -260.0
+offset_top = -190.0
+offset_right = -12.0
+offset_bottom = -12.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 0
+
+[node name="Margin" type="MarginContainer" parent="Root/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBox" type="VBoxContainer" parent="Root/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Mueble"
+
+[node name="Info" type="Label" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Sin seleccion"
+
+[node name="Buttons" type="HBoxContainer" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="Rotate" type="Button" parent="Root/Panel/Margin/VBox/Buttons"]
+layout_mode = 2
+text = "Rotar"
+
+[node name="Delete" type="Button" parent="Root/Panel/Margin/VBox/Buttons"]
+layout_mode = 2
+text = "Eliminar"
+
+[node name="Close" type="Button" parent="Root/Panel/Margin/VBox/Buttons"]
+layout_mode = 2
+text = "Cerrar"
+
+[connection signal="pressed" from="Root/Panel/Margin/VBox/Buttons/Rotate" to="." method="_on_rotate_pressed"]
+[connection signal="pressed" from="Root/Panel/Margin/VBox/Buttons/Delete" to="." method="_on_delete_pressed"]
+[connection signal="pressed" from="Root/Panel/Margin/VBox/Buttons/Close" to="." method="_on_close_pressed"]
