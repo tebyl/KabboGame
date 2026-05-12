@@ -1,0 +1,95 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/NpcManagerPanel.gd" id="1_npc_manager_panel_script"]
+
+[node name="NpcManagerPanel" type="CanvasLayer"]
+script = ExtResource("1_npc_manager_panel_script")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -340.0
+offset_top = -230.0
+offset_right = -16.0
+offset_bottom = 230.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Margin" type="MarginContainer" parent="Root/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="Root/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="HBoxContainer" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Root/Panel/Margin/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "NPCs locales"
+
+[node name="CloseButton" type="Button" parent="Root/Panel/Margin/VBox/Header"]
+layout_mode = 2
+text = "X"
+
+[node name="Toggles" type="VBoxContainer" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="MovementToggle" type="CheckBox" parent="Root/Panel/Margin/VBox/Toggles"]
+layout_mode = 2
+button_pressed = true
+text = "Movimiento NPC"
+
+[node name="ChatToggle" type="CheckBox" parent="Root/Panel/Margin/VBox/Toggles"]
+layout_mode = 2
+button_pressed = true
+text = "Chat NPC"
+
+[node name="Scroll" type="ScrollContainer" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="NpcList" type="VBoxContainer" parent="Root/Panel/Margin/VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Actions" type="HBoxContainer" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="AddButton" type="Button" parent="Root/Panel/Margin/VBox/Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Añadir"
+
+[node name="RespawnButton" type="Button" parent="Root/Panel/Margin/VBox/Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Respawnear"
+
+[connection signal="pressed" from="Root/Panel/Margin/VBox/Header/CloseButton" to="." method="_on_close_button_pressed"]
+[connection signal="pressed" from="Root/Panel/Margin/VBox/Actions/AddButton" to="." method="_on_add_button_pressed"]
+[connection signal="pressed" from="Root/Panel/Margin/VBox/Actions/RespawnButton" to="." method="_on_respawn_button_pressed"]
+[connection signal="toggled" from="Root/Panel/Margin/VBox/Toggles/MovementToggle" to="." method="_on_movement_toggle_toggled"]
+[connection signal="toggled" from="Root/Panel/Margin/VBox/Toggles/ChatToggle" to="." method="_on_chat_toggle_toggled"]

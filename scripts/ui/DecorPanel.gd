@@ -4,6 +4,7 @@ signal floor_type_selected(floor_type: String)
 signal wall_type_selected(wall_type: String)
 signal rotate_preview_requested
 signal cancel_preview_requested
+signal npcs_hidden_changed(hidden: bool)
 signal close_requested
 
 const UIThemeScript := preload("res://scripts/ui/UITheme.gd")
@@ -19,10 +20,12 @@ const WALL_TYPES := ["default", "trim", "dark", "pastel", "blue", "green", "red"
 
 var current_floor_type := "beige_basic"
 var current_wall_type := "default"
+var npcs_hidden := false
 
 @onready var panel: PanelContainer = $Root/Panel
 @onready var floor_list: GridContainer = $Root/Panel/Margin/VBox/FloorList
 @onready var wall_list: GridContainer = $Root/Panel/Margin/VBox/WallList
+@onready var hide_npcs_toggle: CheckBox = $Root/Panel/Margin/VBox/HideNpcsToggle
 
 
 func _ready() -> void:
@@ -35,6 +38,7 @@ func show_panel(next_floor_type: String, next_wall_type: String) -> void:
 	current_floor_type = next_floor_type
 	current_wall_type = next_wall_type
 	visible = true
+	hide_npcs_toggle.button_pressed = npcs_hidden
 	_refresh_button_states()
 
 
@@ -100,6 +104,11 @@ func _on_rotate_preview_pressed() -> void:
 
 func _on_cancel_preview_pressed() -> void:
 	cancel_preview_requested.emit()
+
+
+func _on_hide_npcs_toggled(toggled_on: bool) -> void:
+	npcs_hidden = toggled_on
+	npcs_hidden_changed.emit(npcs_hidden)
 
 
 func _on_close_pressed() -> void:

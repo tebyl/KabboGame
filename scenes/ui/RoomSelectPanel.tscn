@@ -26,17 +26,17 @@ mouse_filter = 0
 color = Color(0, 0, 0, 0.45)
 
 [node name="Card" type="PanelContainer" parent="Root"]
-custom_minimum_size = Vector2(560, 380)
+custom_minimum_size = Vector2(720, 520)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -280.0
-offset_top = -190.0
-offset_right = 280.0
-offset_bottom = 190.0
+offset_left = -360.0
+offset_top = -260.0
+offset_right = 360.0
+offset_bottom = 260.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
@@ -64,6 +64,24 @@ text = "Mis salas"
 layout_mode = 2
 text = "Cerrar"
 
+[node name="Filters" type="HBoxContainer" parent="Root/Card/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SearchInput" type="LineEdit" parent="Root/Card/Margin/VBox/Filters"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Buscar por sala o dueno"
+
+[node name="TypeFilter" type="OptionButton" parent="Root/Card/Margin/VBox/Filters"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+
+[node name="MoodFilter" type="OptionButton" parent="Root/Card/Margin/VBox/Filters"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+
 [node name="RoomsScroll" type="ScrollContainer" parent="Root/Card/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
@@ -74,9 +92,60 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="CreateButton" type="Button" parent="Root/Card/Margin/VBox"]
+[node name="CreateForm" type="HBoxContainer" parent="Root/Card/Margin/VBox"]
 layout_mode = 2
-text = "Crear sala"
+theme_override_constants/separation = 8
+
+[node name="NameInput" type="LineEdit" parent="Root/Card/Margin/VBox/CreateForm"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Nueva Sala"
+placeholder_text = "Nombre"
+
+[node name="WidthInput" type="SpinBox" parent="Root/Card/Margin/VBox/CreateForm"]
+custom_minimum_size = Vector2(82, 0)
+layout_mode = 2
+min_value = 6.0
+max_value = 16.0
+value = 10.0
+
+[node name="HeightInput" type="SpinBox" parent="Root/Card/Margin/VBox/CreateForm"]
+custom_minimum_size = Vector2(82, 0)
+layout_mode = 2
+min_value = 6.0
+max_value = 16.0
+value = 10.0
+
+[node name="CreateButton" type="Button" parent="Root/Card/Margin/VBox/CreateForm"]
+layout_mode = 2
+text = "Crear"
+
+[node name="Actions" type="HBoxContainer" parent="Root/Card/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ExportCurrentButton" type="Button" parent="Root/Card/Margin/VBox/Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Exportar actual"
+
+[node name="ImportButton" type="Button" parent="Root/Card/Margin/VBox/Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Importar sala"
+
+[node name="DeleteConfirm" type="ConfirmationDialog" parent="."]
+title = "Borrar sala"
+initial_position = 2
+size = Vector2i(360, 120)
+dialog_text = "Esta sala se borrara localmente."
 
 [connection signal="pressed" from="Root/Card/Margin/VBox/Header/CloseButton" to="." method="_on_close_button_pressed"]
-[connection signal="pressed" from="Root/Card/Margin/VBox/CreateButton" to="." method="_on_create_button_pressed"]
+[connection signal="text_changed" from="Root/Card/Margin/VBox/Filters/SearchInput" to="." method="_on_search_changed"]
+[connection signal="item_selected" from="Root/Card/Margin/VBox/Filters/TypeFilter" to="." method="_on_type_filter_selected"]
+[connection signal="item_selected" from="Root/Card/Margin/VBox/Filters/MoodFilter" to="." method="_on_mood_filter_selected"]
+[connection signal="pressed" from="Root/Card/Margin/VBox/CreateForm/CreateButton" to="." method="_on_create_button_pressed"]
+[connection signal="pressed" from="Root/Card/Margin/VBox/Actions/ExportCurrentButton" to="." method="_on_export_current_button_pressed"]
+[connection signal="pressed" from="Root/Card/Margin/VBox/Actions/ImportButton" to="." method="_on_import_button_pressed"]
+[connection signal="confirmed" from="DeleteConfirm" to="." method="_on_delete_confirm_confirmed"]

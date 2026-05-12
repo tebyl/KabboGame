@@ -1,0 +1,80 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/OnboardingPanel.gd" id="1_onboarding_panel_script"]
+
+[node name="OnboardingPanel" type="CanvasLayer"]
+script = ExtResource("1_onboarding_panel_script")
+
+[node name="Root" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Overlay" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0, 0, 0, 0.45)
+
+[node name="Card" type="PanelContainer" parent="Root"]
+custom_minimum_size = Vector2(360, 170)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -388.0
+offset_top = -214.0
+offset_right = -28.0
+offset_bottom = -44.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 0
+
+[node name="Margin" type="MarginContainer" parent="Root/Card"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="VBox" type="VBoxContainer" parent="Root/Card/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleLabel" type="Label" parent="Root/Card/Margin/VBox"]
+layout_mode = 2
+text = "Bienvenido a KabboLike"
+
+[node name="BodyLabel" type="Label" parent="Root/Card/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Crea tu sala, decora y conversa con visitantes."
+autowrap_mode = 3
+
+[node name="Buttons" type="HBoxContainer" parent="Root/Card/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SkipButton" type="Button" parent="Root/Card/Margin/VBox/Buttons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Saltar"
+
+[node name="NextButton" type="Button" parent="Root/Card/Margin/VBox/Buttons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Comenzar"
+
+[connection signal="pressed" from="Root/Card/Margin/VBox/Buttons/SkipButton" to="." method="_on_skip_button_pressed"]
+[connection signal="pressed" from="Root/Card/Margin/VBox/Buttons/NextButton" to="." method="_on_next_button_pressed"]

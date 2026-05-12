@@ -8,6 +8,7 @@ const FurnitureCatalogScript := preload("res://scripts/data/FurnitureCatalog.gd"
 
 var inventory := {}
 var current_category := ""
+var selected_furniture_type := ""
 
 @onready var panel: PanelContainer = $Root/Panel
 @onready var category_list: VBoxContainer = $Root/Panel/Margin/VBox/Categories
@@ -54,11 +55,21 @@ func populate_category(category: String) -> void:
 	for item in FurnitureCatalogScript.get_items_by_category(category):
 		var furniture_type := String(item.get("type", ""))
 		var count := int(inventory.get(furniture_type, 0))
+		var size: Vector2i = FurnitureCatalogScript.get_size(furniture_type)
 		var button := Button.new()
-		button.text = "%s x%s" % [String(item.get("name", furniture_type)), count]
+		button.text = "%s\n%sx%s  Cantidad: %s" % [
+			String(item.get("name", furniture_type)),
+			size.x,
+			size.y,
+			count,
+		]
 		button.disabled = count <= 0
-		button.custom_minimum_size = Vector2(180, 32)
+		button.toggle_mode = true
+		button.button_pressed = furniture_type == selected_furniture_type
+		button.custom_minimum_size = Vector2(210, 48)
 		UIThemeScript.apply_primary_button(button)
+		if button.button_pressed:
+			button.modulate = Color(1.0, 1.0, 0.82, 1.0)
 		if count > 0:
 			button.pressed.connect(_on_item_pressed.bind(furniture_type))
 		item_list.add_child(button)
@@ -85,6 +96,8 @@ func _build_categories() -> void:
 
 
 func _on_item_pressed(furniture_type: String) -> void:
+	selected_furniture_type = furniture_type
+	populate_category(current_category)
 	furniture_selected.emit(furniture_type)
 
 

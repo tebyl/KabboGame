@@ -37,6 +37,26 @@ theme_override_constants/margin_bottom = 8
 layout_mode = 2
 theme_override_constants/separation = 6
 
+[node name="Header" type="HBoxContainer" parent="Root/ChatCard/Margin/VBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Root/ChatCard/Margin/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Chat"
+
+[node name="MinimizeButton" type="Button" parent="Root/ChatCard/Margin/VBox/Header"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+text = "-"
+
+[node name="MinimizedLabel" type="Label" parent="Root/ChatCard/Margin/VBox"]
+visible = false
+layout_mode = 2
+text = "Chat"
+clip_text = true
+text_overrun_behavior = 3
+
 [node name="MessageScroll" type="ScrollContainer" parent="Root/ChatCard/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
@@ -61,3 +81,4 @@ layout_mode = 2
 text = "Enviar"
 
 [connection signal="pressed" from="Root/ChatCard/Margin/VBox/InputRow/SendButton" to="." method="_on_send_button_pressed"]
+[connection signal="pressed" from="Root/ChatCard/Margin/VBox/Header/MinimizeButton" to="." method="_on_minimize_button_pressed"]

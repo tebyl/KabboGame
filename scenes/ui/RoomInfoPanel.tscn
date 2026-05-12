@@ -1,0 +1,124 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/RoomInfoPanel.gd" id="1_room_info_script"]
+
+[node name="RoomInfoPanel" type="CanvasLayer"]
+visible = false
+script = ExtResource("1_room_info_script")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -180.0
+offset_right = 220.0
+offset_bottom = 180.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Margin" type="MarginContainer" parent="Root/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="VBox" type="VBoxContainer" parent="Root/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TypeAccent" type="ColorRect" parent="Root/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+color = Color(0.18, 0.48, 0.95, 1)
+
+[node name="Title" type="Label" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Sala"
+
+[node name="Description" type="Label" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 3
+text = ""
+
+[node name="Stats" type="VBoxContainer" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Owner" type="Label" parent="Root/Panel/Margin/VBox/Stats"]
+layout_mode = 2
+text = "Dueño:"
+
+[node name="Type" type="Label" parent="Root/Panel/Margin/VBox/Stats"]
+layout_mode = 2
+text = "Tipo:"
+
+[node name="Mood" type="Label" parent="Root/Panel/Margin/VBox/Stats"]
+layout_mode = 2
+text = "Estado:"
+
+[node name="Size" type="Label" parent="Root/Panel/Margin/VBox/Stats"]
+layout_mode = 2
+text = "Tamaño:"
+
+[node name="Furniture" type="Label" parent="Root/Panel/Margin/VBox/Stats"]
+layout_mode = 2
+text = "Muebles:"
+
+[node name="Visits" type="Label" parent="Root/Panel/Margin/VBox/Stats"]
+layout_mode = 2
+text = "Visitas:"
+
+[node name="CreatedAt" type="Label" parent="Root/Panel/Margin/VBox/Stats"]
+layout_mode = 2
+text = "Creada:"
+
+[node name="UpdatedAt" type="Label" parent="Root/Panel/Margin/VBox/Stats"]
+layout_mode = 2
+text = "Actualizada:"
+
+[node name="VisitTrend" type="Label" parent="Root/Panel/Margin/VBox/Stats"]
+layout_mode = 2
+text = "Visitas recientes:"
+
+[node name="RatingRow" type="VBoxContainer" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="RatingLabel" type="Label" parent="Root/Panel/Margin/VBox/RatingRow"]
+layout_mode = 2
+text = "Rating local: 0/5"
+
+[node name="Buttons" type="HBoxContainer" parent="Root/Panel/Margin/VBox/RatingRow"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Actions" type="HBoxContainer" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+alignment = 2
+theme_override_constants/separation = 8
+
+[node name="Edit" type="Button" parent="Root/Panel/Margin/VBox/Actions"]
+layout_mode = 2
+text = "Editar"
+
+[node name="Close" type="Button" parent="Root/Panel/Margin/VBox/Actions"]
+layout_mode = 2
+text = "Cerrar"
+
+[connection signal="pressed" from="Root/Panel/Margin/VBox/Actions/Edit" to="." method="_on_edit_pressed"]
+[connection signal="pressed" from="Root/Panel/Margin/VBox/Actions/Close" to="." method="_on_close_pressed"]

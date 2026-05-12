@@ -1,0 +1,4 @@
+KabboLike Demo
+Version: 0.1.0
+Build: rc2
+Date: 2026-05-12

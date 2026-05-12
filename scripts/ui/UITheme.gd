@@ -41,6 +41,17 @@ static func apply_label(label: Label, muted: bool = false) -> void:
 	label.add_theme_color_override("font_color", COLOR_TEXT_MUTED if muted else COLOR_TEXT)
 
 
+static func apply_popup_menu_style(popup: PopupMenu) -> void:
+	popup.add_theme_stylebox_override("panel", _make_stylebox(COLOR_PANEL_DARK, 8, Color(0.25, 0.38, 0.58), 1))
+	popup.add_theme_stylebox_override("hover", _make_stylebox(COLOR_SECONDARY.lightened(0.08), 6, Color(0.28, 0.48, 0.76), 1))
+	popup.add_theme_color_override("font_color", COLOR_TEXT)
+	popup.add_theme_color_override("font_hover_color", COLOR_TEXT)
+	popup.add_theme_color_override("font_separator_color", COLOR_TEXT_MUTED)
+	popup.add_theme_constant_override("v_separation", 4)
+	popup.add_theme_constant_override("item_start_padding", 10)
+	popup.add_theme_constant_override("item_end_padding", 12)
+
+
 static func _apply_button_style(button: Button, color: Color) -> void:
 	button.add_theme_color_override("font_color", COLOR_TEXT)
 	button.add_theme_stylebox_override("normal", _make_stylebox(color, 8, color.lightened(0.12), 1))

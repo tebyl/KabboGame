@@ -2,11 +2,11 @@ class_name NPCManager
 extends RefCounted
 
 const DEFAULT_NPCS := [
-	{ "id": "mira", "name": "Mira", "avatar_variant": "green", "cell": { "x": 2, "y": 2 } },
-	{ "id": "pixel", "name": "Pixel", "avatar_variant": "purple", "cell": { "x": 7, "y": 3 } },
-	{ "id": "nova", "name": "Nova", "avatar_variant": "yellow", "cell": { "x": 5, "y": 7 } },
-	{ "id": "neo", "name": "Neo", "avatar_variant": "red", "cell": { "x": 6, "y": 5 } },
-	{ "id": "luna", "name": "Luna", "avatar_variant": "blue", "cell": { "x": 3, "y": 6 } },
+	{ "id": "mira", "name": "Mira", "avatar_variant": "green", "cell": { "x": 1, "y": 2 } },
+	{ "id": "neo", "name": "Neo", "avatar_variant": "red", "cell": { "x": 8, "y": 2 } },
+	{ "id": "nova", "name": "Nova", "avatar_variant": "yellow", "cell": { "x": 2, "y": 8 } },
+	{ "id": "luna", "name": "Luna", "avatar_variant": "blue", "cell": { "x": 8, "y": 7 } },
+	{ "id": "pixel", "name": "Pixel", "avatar_variant": "purple", "cell": { "x": 5, "y": 5 } },
 ]
 
 const CHAT_LINES := [

@@ -4,7 +4,8 @@ signal move_finished
 
 const TILE_WIDTH := 64
 const TILE_HEIGHT := 32
-const MOVE_DURATION := 0.2
+const MOVE_DURATION := 0.24
+const BOB_OFFSET := -2.0
 const IsoGridScript := preload("res://scripts/room/IsoGrid.gd")
 
 var current_cell := Vector2i.ZERO
@@ -57,14 +58,22 @@ func set_cell(cell: Vector2i) -> void:
 
 
 func move_to_cell(cell: Vector2i) -> void:
+	if cell == current_cell:
+		move_finished.emit()
+		return
 	var delta := cell - current_cell
 	set_iso_direction_from_grid_delta(delta)
 	current_cell = cell
-	z_index = int(IsoGridScript.grid_to_world(cell, TILE_WIDTH, TILE_HEIGHT).y)
+	var target_position := IsoGridScript.grid_to_world(cell, TILE_WIDTH, TILE_HEIGHT)
 	if move_tween:
 		move_tween.kill()
 	move_tween = create_tween()
-	move_tween.tween_property(self, "position", IsoGridScript.grid_to_world(cell, TILE_WIDTH, TILE_HEIGHT), MOVE_DURATION)
+	move_tween.set_trans(Tween.TRANS_SINE)
+	move_tween.set_ease(Tween.EASE_IN_OUT)
+	move_tween.set_parallel(true)
+	move_tween.tween_property(self, "position", target_position, MOVE_DURATION)
+	move_tween.tween_property(sprite, "position:y", BOB_OFFSET, MOVE_DURATION * 0.5)
+	move_tween.chain().tween_property(sprite, "position:y", 0.0, MOVE_DURATION * 0.5)
 	move_tween.finished.connect(_on_move_tween_finished)
 
 

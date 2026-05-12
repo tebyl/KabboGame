@@ -1,0 +1,99 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/SettingsPanel.gd" id="1_settings_panel_script"]
+
+[node name="SettingsPanel" type="CanvasLayer"]
+script = ExtResource("1_settings_panel_script")
+
+[node name="Root" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Overlay" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.45)
+
+[node name="Card" type="PanelContainer" parent="Root"]
+custom_minimum_size = Vector2(420, 230)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -210.0
+offset_top = -115.0
+offset_right = 210.0
+offset_bottom = 115.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Margin" type="MarginContainer" parent="Root/Card"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="VBox" type="VBoxContainer" parent="Root/Card/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="Root/Card/Margin/VBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Root/Card/Margin/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Sonido"
+
+[node name="CloseButton" type="Button" parent="Root/Card/Margin/VBox/Header"]
+layout_mode = 2
+text = "Cerrar"
+
+[node name="SfxCheck" type="CheckBox" parent="Root/Card/Margin/VBox"]
+layout_mode = 2
+button_pressed = true
+text = "Sonidos activados"
+
+[node name="VolumeRow" type="HBoxContainer" parent="Root/Card/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="VolumeLabel" type="Label" parent="Root/Card/Margin/VBox/VolumeRow"]
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+text = "Volumen: 80%"
+
+[node name="VolumeSlider" type="HSlider" parent="Root/Card/Margin/VBox/VolumeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.05
+value = 0.8
+
+[node name="TestAudioButton" type="Button" parent="Root/Card/Margin/VBox"]
+layout_mode = 2
+text = "Probar sonido"
+
+[node name="GlyphTest" type="Label" parent="Root/Card/Margin/VBox"]
+layout_mode = 2
+text = "Prueba tildes: áéíóú ñÑ ¿¡"
+
+[connection signal="pressed" from="Root/Card/Margin/VBox/Header/CloseButton" to="." method="_on_close_button_pressed"]
+[connection signal="toggled" from="Root/Card/Margin/VBox/SfxCheck" to="." method="_on_sfx_check_toggled"]
+[connection signal="pressed" from="Root/Card/Margin/VBox/TestAudioButton" to="." method="_on_test_audio_pressed"]
+[connection signal="value_changed" from="Root/Card/Margin/VBox/VolumeRow/VolumeSlider" to="." method="_on_volume_slider_value_changed"]

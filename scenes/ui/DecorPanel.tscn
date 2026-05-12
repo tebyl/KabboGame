@@ -43,7 +43,7 @@ theme_override_constants/separation = 8
 
 [node name="Title" type="Label" parent="Root/Panel/Margin/VBox"]
 layout_mode = 2
-text = "Decoracion"
+text = "Decoración"
 
 [node name="FloorTitle" type="Label" parent="Root/Panel/Margin/VBox"]
 layout_mode = 2
@@ -60,6 +60,10 @@ text = "Paredes"
 [node name="WallList" type="GridContainer" parent="Root/Panel/Margin/VBox"]
 layout_mode = 2
 columns = 2
+
+[node name="HideNpcsToggle" type="CheckBox" parent="Root/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Ocultar NPCs"
 
 [node name="Tools" type="HBoxContainer" parent="Root/Panel/Margin/VBox"]
 layout_mode = 2
@@ -79,3 +83,4 @@ text = "Cerrar"
 [connection signal="pressed" from="Root/Panel/Margin/VBox/Tools/RotatePreview" to="." method="_on_rotate_preview_pressed"]
 [connection signal="pressed" from="Root/Panel/Margin/VBox/Tools/CancelPreview" to="." method="_on_cancel_preview_pressed"]
 [connection signal="pressed" from="Root/Panel/Margin/VBox/Tools/Close" to="." method="_on_close_pressed"]
+[connection signal="toggled" from="Root/Panel/Margin/VBox/HideNpcsToggle" to="." method="_on_hide_npcs_toggled"]

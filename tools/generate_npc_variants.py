@@ -14,6 +14,7 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 SOURCE_DIR = ROOT_DIR / "assets" / "sprites" / "player"
 OUTPUT_DIR = ROOT_DIR / "assets" / "sprites" / "npc"
 OVERLAY_DIR = ROOT_DIR / "assets" / "sprites" / "npc_overlays"
+ENABLE_OVERLAYS = False
 
 DIRECTIONS = [
     "east",
@@ -263,6 +264,8 @@ def make_procedural_overlay(size: tuple[int, int], overlay_name: str, direction:
 
 
 def apply_overlays(image: Image.Image, config: dict, direction: str, missing_overlays: set[str]) -> Image.Image:
+    if not ENABLE_OVERLAYS:
+        return image
     result = image
     for overlay_name in config.get("overlays", []):
         result, applied_external = apply_external_overlay(result, overlay_name, direction)

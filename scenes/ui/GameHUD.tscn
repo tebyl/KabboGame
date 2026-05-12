@@ -34,14 +34,23 @@ layout_mode = 2
 theme_override_constants/separation = 12
 
 [node name="RoomName" type="Label" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Mi Sala"
+clip_text = true
+text_overrun_behavior = 3
 vertical_alignment = 1
 
 [node name="PlayerName" type="Label" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+visible = false
 layout_mode = 2
 text = "Invitado"
+vertical_alignment = 1
+
+[node name="RoleLabel" type="Label" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+text = "Dueño"
 vertical_alignment = 1
 
 [node name="CoinsLabel" type="Label" parent="Root/TopBar/MarginContainer/HBoxContainer"]
@@ -49,9 +58,19 @@ layout_mode = 2
 text = "Monedas: 500"
 vertical_alignment = 1
 
-[node name="MenuButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+[node name="MissionsButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+visible = false
 layout_mode = 2
-text = "Menu"
+text = "Misiones"
+
+[node name="AchievementsButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+visible = false
+layout_mode = 2
+text = "Logros"
+
+[node name="MenuButton" type="MenuButton" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+text = "Menú"
 
 [node name="DecorateButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
 layout_mode = 2
@@ -59,10 +78,12 @@ toggle_mode = true
 text = "Decora"
 
 [node name="RotateButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+visible = false
 layout_mode = 2
 text = "Rotar"
 
 [node name="DeleteButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+visible = false
 layout_mode = 2
 text = "Eliminar"
 
@@ -71,20 +92,34 @@ layout_mode = 2
 text = "Inventario"
 
 [node name="SaveButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+visible = false
 layout_mode = 2
 text = "Guardar"
 
 [node name="ProfileButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+visible = false
 layout_mode = 2
 text = "Perfil"
 
 [node name="ShopButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+visible = false
 layout_mode = 2
 text = "Tienda"
 
 [node name="RoomsButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+visible = false
 layout_mode = 2
 text = "Salas"
+
+[node name="TutorialButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+visible = false
+layout_mode = 2
+text = "?"
+
+[node name="SettingsButton" type="Button" parent="Root/TopBar/MarginContainer/HBoxContainer"]
+visible = false
+layout_mode = 2
+text = "Audio"
 
 [node name="HelpText" type="Label" parent="Root"]
 layout_mode = 1
@@ -136,3 +171,7 @@ horizontal_alignment = 1
 [connection signal="pressed" from="Root/TopBar/MarginContainer/HBoxContainer/ProfileButton" to="." method="_on_profile_button_pressed"]
 [connection signal="pressed" from="Root/TopBar/MarginContainer/HBoxContainer/ShopButton" to="." method="_on_shop_button_pressed"]
 [connection signal="pressed" from="Root/TopBar/MarginContainer/HBoxContainer/RoomsButton" to="." method="_on_rooms_button_pressed"]
+[connection signal="pressed" from="Root/TopBar/MarginContainer/HBoxContainer/TutorialButton" to="." method="_on_tutorial_button_pressed"]
+[connection signal="pressed" from="Root/TopBar/MarginContainer/HBoxContainer/MissionsButton" to="." method="_on_missions_button_pressed"]
+[connection signal="pressed" from="Root/TopBar/MarginContainer/HBoxContainer/AchievementsButton" to="." method="_on_achievements_button_pressed"]
+[connection signal="pressed" from="Root/TopBar/MarginContainer/HBoxContainer/SettingsButton" to="." method="_on_settings_button_pressed"]

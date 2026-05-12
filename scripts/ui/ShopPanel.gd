@@ -4,6 +4,7 @@ signal buy_requested(furniture_type: String)
 signal close_requested
 
 const UIThemeScript := preload("res://scripts/ui/UITheme.gd")
+const FurnitureCatalogScript := preload("res://scripts/data/FurnitureCatalog.gd")
 
 var shop_items := []
 var inventory := {}
@@ -89,13 +90,13 @@ func _build_item_row(item: Dictionary) -> PanelContainer:
 	UIThemeScript.apply_label(name_label)
 	hbox.add_child(name_label)
 
-	var price := int(item.get("price", 0))
+	var furniture_type := String(item.get("type", ""))
+	var price: int = max(0, int(item.get("price", FurnitureCatalogScript.get_price(furniture_type))))
 	var price_label := Label.new()
-	price_label.text = "%s c" % price
+	price_label.text = "%s c" % price if coins >= price else "%s c - faltan %s" % [price, price - coins]
 	UIThemeScript.apply_label(price_label, coins < price)
 	hbox.add_child(price_label)
 
-	var furniture_type := String(item.get("type", ""))
 	var owned_label := Label.new()
 	owned_label.text = "Inv x%s" % int(inventory.get(furniture_type, 0))
 	UIThemeScript.apply_label(owned_label, true)

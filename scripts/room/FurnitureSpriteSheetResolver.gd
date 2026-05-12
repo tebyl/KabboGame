@@ -30,8 +30,15 @@ const ROTATION_TO_PATH := {
 const DEFAULT_PATH := "res://assets/sprites/furniture/furniture_spritesheet_south-east.png"
 const LEGACY_PATH := "res://assets/sprites/furniture/furniture_spritesheet.png"
 
+static var _spritesheet_cache := {}
+static var _atlas_cache := {}
+
 
 static func get_furniture_texture(furniture_type: String, furniture_rotation: int) -> Texture2D:
+	var cache_key := "%s_%s" % [furniture_type, posmod(furniture_rotation, 4)]
+	if _atlas_cache.has(cache_key):
+		return _atlas_cache[cache_key]
+
 	var spritesheet := _load_spritesheet(furniture_rotation)
 	if not spritesheet:
 		return null
@@ -41,15 +48,22 @@ static func get_furniture_texture(furniture_type: String, furniture_rotation: in
 	var atlas := AtlasTexture.new()
 	atlas.atlas = spritesheet
 	atlas.region = Rect2i(atlas_cell * tile_size, tile_size)
+	_atlas_cache[cache_key] = atlas
 	return atlas
 
 
 static func _load_spritesheet(furniture_rotation: int) -> Texture2D:
 	var path := String(ROTATION_TO_PATH.get(posmod(furniture_rotation, 4), DEFAULT_PATH))
+	var resolved_path := ""
 	if ResourceLoader.exists(path):
-		return load(path)
-	if ResourceLoader.exists(DEFAULT_PATH):
-		return load(DEFAULT_PATH)
-	if ResourceLoader.exists(LEGACY_PATH):
-		return load(LEGACY_PATH)
+		resolved_path = path
+	elif ResourceLoader.exists(DEFAULT_PATH):
+		resolved_path = DEFAULT_PATH
+	elif ResourceLoader.exists(LEGACY_PATH):
+		resolved_path = LEGACY_PATH
+
+	if not resolved_path.is_empty():
+		if not _spritesheet_cache.has(resolved_path):
+			_spritesheet_cache[resolved_path] = load(resolved_path)
+		return _spritesheet_cache[resolved_path]
 	return null
