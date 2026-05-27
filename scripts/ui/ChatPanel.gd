@@ -7,6 +7,19 @@ const UIThemeScript := preload("res://scripts/ui/UITheme.gd")
 const ChatManagerScript := preload("res://scripts/data/ChatManager.gd")
 const MAX_TEXT_LENGTH := ChatManagerScript.MAX_TEXT_LENGTH
 const MAX_VISIBLE_MESSAGES := 40
+const COLOR_CHAT_BG := Color(0.02, 0.12, 0.24, 0.98)
+const COLOR_CHAT_BODY := Color(0.01, 0.05, 0.11, 0.98)
+const COLOR_CHAT_BORDER := Color(0.12, 0.78, 1.0, 1.0)
+const COLOR_CHAT_BUTTON := Color(0.03, 0.35, 0.68, 1.0)
+const COLOR_CHAT_SUCCESS := Color(0.20, 0.70, 0.16, 1.0)
+const COLOR_CHAT_TEXT := Color(0.96, 0.98, 1.0, 1.0)
+const COLOR_CHAT_MUTED := Color(0.66, 0.78, 0.90, 1.0)
+const SENDER_COLORS := {
+	"Mira": "ff7bd5",
+	"Luna": "66f3ff",
+	"Invitado": "ffd86b",
+	"Sistema": "9db8d6",
+}
 
 var minimized := false
 var last_message_text := "Chat"
@@ -24,11 +37,7 @@ var counter_label: Label
 
 
 func _ready() -> void:
-	UIThemeScript.apply_panel_style(chat_card)
-	UIThemeScript.apply_label(title_label)
-	UIThemeScript.apply_label(minimized_label, true)
-	UIThemeScript.apply_secondary_button(minimize_button)
-	UIThemeScript.apply_primary_button(send_button)
+	_apply_premium_chat_styles()
 	chat_input.max_length = MAX_TEXT_LENGTH
 	chat_input.text_submitted.connect(_on_text_submitted)
 	chat_input.text_changed.connect(_on_text_changed)
@@ -47,13 +56,24 @@ func set_messages(messages: Array) -> void:
 
 
 func add_message(message: Dictionary) -> void:
-	last_message_text = "%s: %s" % [String(message.get("sender", "Invitado")), String(message.get("text", ""))]
+	var sender := String(message.get("sender", "Invitado"))
+	var text := String(message.get("text", ""))
+	last_message_text = "%s: %s" % [sender, text]
 	minimized_label.text = last_message_text
-	var label := Label.new()
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.text = last_message_text
-	UIThemeScript.apply_label(label)
-	message_list.add_child(label)
+	var rich_label := RichTextLabel.new()
+	rich_label.bbcode_enabled = true
+	rich_label.fit_content = true
+	rich_label.scroll_active = false
+	rich_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	rich_label.selection_enabled = false
+	rich_label.add_theme_font_size_override("normal_font_size", 16)
+	rich_label.add_theme_color_override("default_color", COLOR_CHAT_TEXT)
+	rich_label.text = "[color=#%s][b]%s:[/b][/color] %s" % [
+		_get_sender_color(sender),
+		_escape_bbcode(sender),
+		_escape_bbcode(text),
+	]
+	message_list.add_child(rich_label)
 	_trim_visible_messages()
 	_scroll_to_bottom()
 
@@ -115,9 +135,11 @@ func _on_text_changed(_text: String) -> void:
 
 func _setup_counter_label() -> void:
 	counter_label = Label.new()
-	UIThemeScript.apply_label(counter_label, true)
+	counter_label.add_theme_color_override("font_color", COLOR_CHAT_MUTED)
+	counter_label.add_theme_font_size_override("font_size", 15)
 	counter_label.custom_minimum_size = Vector2(64, 0)
 	counter_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	counter_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	input_row.add_child(counter_label)
 	var send_index := input_row.get_children().find(send_button)
 	if send_index != -1:
@@ -147,5 +169,97 @@ func _apply_minimized_state() -> void:
 	input_row.visible = not minimized
 	minimized_label.visible = minimized
 	minimize_button.text = "+" if minimized else "-"
-	chat_card.offset_top = -48.0 if minimized else -180.0
-	chat_card.offset_right = 320.0 if minimized else 380.0
+	chat_card.offset_top = -58.0 if minimized else -250.0
+	chat_card.offset_right = 360.0 if minimized else 500.0
+
+
+func _apply_premium_chat_styles() -> void:
+	chat_card.add_theme_stylebox_override("panel", _make_premium_stylebox(COLOR_CHAT_BG, 2, COLOR_CHAT_BORDER, 3))
+	UIThemeScript.apply_texture_panel_style(chat_card, "chat_panel_9slice", 8)
+	chat_card.offset_left = 14.0
+	chat_card.offset_bottom = -14.0
+	_add_header_icon()
+	title_label.text = "Chat"
+	title_label.add_theme_color_override("font_color", COLOR_CHAT_TEXT)
+	title_label.add_theme_font_size_override("font_size", 26)
+	title_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	minimized_label.add_theme_color_override("font_color", COLOR_CHAT_MUTED)
+	minimized_label.add_theme_font_size_override("font_size", 15)
+	_style_premium_button(minimize_button, COLOR_CHAT_BUTTON)
+	UIThemeScript.apply_texture_button_style(minimize_button, "dark", 8)
+	minimize_button.custom_minimum_size = Vector2(42, 34)
+	_style_premium_button(send_button, COLOR_CHAT_SUCCESS)
+	UIThemeScript.apply_texture_button_style(send_button, "green", 8)
+	send_button.custom_minimum_size = Vector2(92, 40)
+	send_button.text = "Enviar"
+	chat_input.custom_minimum_size = Vector2(0, 40)
+	chat_input.placeholder_text = "Enter para chatear"
+	chat_input.add_theme_color_override("font_color", COLOR_CHAT_TEXT)
+	chat_input.add_theme_color_override("font_placeholder_color", COLOR_CHAT_MUTED.darkened(0.10))
+	chat_input.add_theme_font_size_override("font_size", 16)
+	chat_input.add_theme_stylebox_override("normal", _make_premium_stylebox(COLOR_CHAT_BODY, 2, COLOR_CHAT_BORDER.darkened(0.20), 2))
+	chat_input.add_theme_stylebox_override("focus", _make_premium_stylebox(COLOR_CHAT_BODY.lightened(0.04), 2, COLOR_CHAT_BORDER, 2))
+	message_scroll.custom_minimum_size = Vector2(0, 128)
+	message_scroll.add_theme_stylebox_override("panel", _make_premium_stylebox(COLOR_CHAT_BODY, 2, COLOR_CHAT_BORDER.darkened(0.20), 2))
+	message_scroll.get_v_scroll_bar().custom_minimum_size = Vector2(14, 0)
+	message_scroll.get_v_scroll_bar().add_theme_stylebox_override("scroll", _make_premium_stylebox(Color(0.02, 0.10, 0.20, 1.0), 2, COLOR_CHAT_BORDER.darkened(0.35), 1))
+	message_scroll.get_v_scroll_bar().add_theme_stylebox_override("grabber", _make_premium_stylebox(COLOR_CHAT_BORDER.darkened(0.10), 2, COLOR_CHAT_BORDER, 1))
+	message_list.add_theme_constant_override("separation", 5)
+	input_row.add_theme_constant_override("separation", 8)
+
+
+func _add_header_icon() -> void:
+	var header: HBoxContainer = $Root/ChatCard/Margin/VBox/Header
+	if header.has_node("ChatIcon"):
+		return
+	var texture := UIThemeScript.load_ui_texture("res://assets/ui/icons/icon_chat.png")
+	if not texture:
+		return
+	var icon := TextureRect.new()
+	icon.name = "ChatIcon"
+	icon.texture = texture
+	icon.custom_minimum_size = Vector2(32, 32)
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
+	header.add_child(icon)
+	header.move_child(icon, 0)
+
+
+func _style_premium_button(button: Button, color: Color) -> void:
+	button.add_theme_color_override("font_color", COLOR_CHAT_TEXT)
+	button.add_theme_color_override("font_disabled_color", COLOR_CHAT_MUTED)
+	button.add_theme_font_size_override("font_size", 16)
+	button.add_theme_stylebox_override("normal", _make_premium_stylebox(color, 2, COLOR_CHAT_BORDER, 2))
+	button.add_theme_stylebox_override("hover", _make_premium_stylebox(color.lightened(0.12), 2, Color(1.0, 0.78, 0.20, 1.0), 2))
+	button.add_theme_stylebox_override("pressed", _make_premium_stylebox(color.darkened(0.10), 2, COLOR_CHAT_BORDER.darkened(0.1), 2))
+	button.add_theme_stylebox_override("disabled", _make_premium_stylebox(color.darkened(0.28), 2, COLOR_CHAT_BORDER.darkened(0.35), 1))
+
+
+func _make_premium_stylebox(color: Color, radius: int, border_color: Color, border_width: int) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = color
+	style.corner_radius_top_left = radius
+	style.corner_radius_top_right = radius
+	style.corner_radius_bottom_left = radius
+	style.corner_radius_bottom_right = radius
+	style.border_color = border_color
+	style.border_width_left = border_width
+	style.border_width_top = border_width
+	style.border_width_right = border_width
+	style.border_width_bottom = border_width
+	style.content_margin_left = 8
+	style.content_margin_right = 8
+	style.content_margin_top = 6
+	style.content_margin_bottom = 6
+	return style
+
+
+func _get_sender_color(sender: String) -> String:
+	if SENDER_COLORS.has(sender):
+		return String(SENDER_COLORS[sender])
+	var hash_value := abs(sender.hash())
+	var palette := ["ffd86b", "66f3ff", "ff8acb", "a8ff8a", "c8a2ff"]
+	return palette[hash_value % palette.size()]
+
+
+func _escape_bbcode(value: String) -> String:
+	return value.replace("[", "\\[").replace("]", "\\]")

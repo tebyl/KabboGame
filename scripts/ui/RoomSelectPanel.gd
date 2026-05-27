@@ -203,6 +203,7 @@ func _build_room_row(room: Dictionary) -> PanelContainer:
 
 	var rename_button := _make_button("Renombrar", "secondary")
 	rename_button.custom_minimum_size = Vector2(112, 32)
+	UIThemeScript.apply_button_icon(rename_button, "profile")
 	rename_button.disabled = not can_rename
 	rename_button.pressed.connect(_on_rename_pressed.bind(room_id, rename_input))
 	rename_row.add_child(rename_button)
@@ -218,6 +219,7 @@ func _build_room_row(room: Dictionary) -> PanelContainer:
 	enter_button.disabled = is_current
 	enter_button.custom_minimum_size = Vector2(122, 62)
 	_apply_primary_big_button(enter_button)
+	UIThemeScript.apply_button_icon(enter_button, "room")
 	if is_current:
 		_apply_current_enter_button(enter_button)
 	enter_button.pressed.connect(_on_enter_pressed.bind(room_id))
@@ -235,12 +237,14 @@ func _build_room_row(room: Dictionary) -> PanelContainer:
 
 	var export_button := _make_button("Exportar", "export")
 	export_button.custom_minimum_size = Vector2(100, 32)
+	UIThemeScript.apply_button_icon(export_button, "arrow_up")
 	export_button.disabled = not can_export
 	export_button.pressed.connect(_on_export_pressed.bind(room_id))
 	actions.add_child(export_button)
 
 	var delete_button := _make_button("Borrar", "danger")
 	delete_button.custom_minimum_size = Vector2(100, 32)
+	UIThemeScript.apply_button_icon(delete_button, "trash")
 	delete_button.disabled = rooms.size() <= 1 or not can_delete
 	delete_button.pressed.connect(_on_delete_pressed.bind(room_id))
 	actions.add_child(delete_button)
@@ -266,6 +270,7 @@ func _apply_static_styles() -> void:
 	var close_button: Button = $Root/Card/Margin/VBox/Header/CloseButton
 	close_button.text = "Cerrar"
 	_apply_danger_button(close_button)
+	UIThemeScript.apply_button_icon(close_button, "close")
 
 	search_input.placeholder_text = "Buscar por sala o dueño"
 	search_input.custom_minimum_size = Vector2(360, 36)
@@ -281,15 +286,18 @@ func _apply_static_styles() -> void:
 	create_button.text = "+ Crear"
 	create_button.custom_minimum_size = Vector2(122, 40)
 	_apply_success_button(create_button)
+	UIThemeScript.apply_button_icon(create_button, "room")
 
 	var import_button: Button = $Root/Card/Margin/VBox/Actions/ImportButton
 	import_button.text = "Importar sala"
 	import_button.custom_minimum_size = Vector2(220, 42)
 	_apply_primary_button(import_button)
+	UIThemeScript.apply_button_icon(import_button, "arrow_down")
 
 	export_current_button.text = "Exportar actual"
 	export_current_button.custom_minimum_size = Vector2(220, 42)
 	_apply_primary_button(export_current_button)
+	UIThemeScript.apply_button_icon(export_current_button, "arrow_up")
 
 	_apply_input_style(name_input)
 	_apply_spinbox_style(width_input)
@@ -353,6 +361,7 @@ func _make_button(text: String, kind: String) -> Button:
 
 func _apply_window_style(panel: PanelContainer) -> void:
 	panel.add_theme_stylebox_override("panel", _make_stylebox(COLOR_WINDOW_BG, 12, COLOR_WINDOW_BORDER, 3))
+	UIThemeScript.apply_texture_panel_style(panel, "panel_modal_9slice", 10)
 
 
 func _apply_card_style(panel: PanelContainer, is_current: bool) -> void:
@@ -362,30 +371,37 @@ func _apply_card_style(panel: PanelContainer, is_current: bool) -> void:
 
 func _apply_primary_button(button: Button) -> void:
 	_apply_button_style(button, UIThemeScript.COLOR_PRIMARY)
+	UIThemeScript.apply_texture_button_style(button, "blue", 8)
 
 
 func _apply_secondary_button(button: Button) -> void:
 	_apply_button_style(button, UIThemeScript.COLOR_SECONDARY)
+	UIThemeScript.apply_texture_button_style(button, "dark", 8)
 
 
 func _apply_success_button(button: Button) -> void:
 	_apply_button_style(button, UIThemeScript.COLOR_SUCCESS)
+	UIThemeScript.apply_texture_button_style(button, "green", 8)
 
 
 func _apply_danger_button(button: Button) -> void:
 	_apply_button_style(button, UIThemeScript.COLOR_DANGER)
+	UIThemeScript.apply_texture_button_style(button, "red", 8)
 
 
 func _apply_export_button(button: Button) -> void:
 	_apply_button_style(button, COLOR_EXPORT_BUTTON)
+	UIThemeScript.apply_texture_button_style(button, "blue", 8)
 
 
 func _apply_badge_button(button: Button) -> void:
 	_apply_button_style(button, COLOR_BADGE_BG)
+	UIThemeScript.apply_texture_button_style(button, "yellow", 8)
 
 
 func _apply_primary_big_button(button: Button) -> void:
 	_apply_button_style(button, COLOR_ENTER_BUTTON)
+	UIThemeScript.apply_texture_button_style(button, "cyan", 8)
 	button.add_theme_font_size_override("font_size", 18)
 
 

@@ -4,6 +4,14 @@ const UIThemeScript := preload("res://scripts/ui/UITheme.gd")
 const PermissionManagerScript := preload("res://scripts/data/PermissionManager.gd")
 const DebugConfigScript := preload("res://scripts/data/DebugConfig.gd")
 const VERSION_PATH := "res://VERSION.txt"
+const COLOR_HUD_BG := Color(0.02, 0.20, 0.42, 0.98)
+const COLOR_HUD_BG_DARK := Color(0.02, 0.08, 0.16, 0.98)
+const COLOR_HUD_BORDER := Color(0.12, 0.78, 1.0, 1.0)
+const COLOR_HUD_BUTTON := Color(0.02, 0.18, 0.34, 1.0)
+const COLOR_HUD_BUTTON_HOT := Color(0.03, 0.47, 0.86, 1.0)
+const COLOR_HUD_GOLD := Color(1.0, 0.74, 0.16, 1.0)
+const COLOR_HUD_TEXT := Color(0.96, 0.98, 1.0, 1.0)
+const COLOR_HUD_MUTED := Color(0.66, 0.78, 0.90, 1.0)
 
 signal decorate_toggled(enabled: bool)
 signal rotate_selected_requested
@@ -79,6 +87,7 @@ func set_decorate_enabled(enabled: bool) -> void:
 	decorate_button.set_pressed_no_signal(enabled)
 	decorate_button.text = "Decora ON" if enabled else "Decora"
 	help_text.text = "Selecciona o coloca muebles" if enabled else "Click para caminar"
+	_apply_decorate_button_state(enabled)
 
 
 func set_decoration_enabled(enabled: bool) -> void:
@@ -156,7 +165,7 @@ func _on_settings_button_pressed() -> void:
 func _setup_menu() -> void:
 	var popup := menu_button.get_popup()
 	popup.clear()
-	UIThemeScript.apply_popup_menu_style(popup)
+	_apply_premium_popup_style(popup)
 	popup.add_item("Información de sala", 1)
 	popup.add_item("Editar sala", 2)
 	popup.add_item("Misiones", 3)
@@ -168,8 +177,8 @@ func _setup_menu() -> void:
 	popup.add_item("Salas", 8)
 	popup.add_item("NPCs", 9)
 	popup.add_item("Audio", 10)
-	popup.add_item("Reiniciar tutorial", 11)
 	popup.add_separator()
+	popup.add_item("Reiniciar tutorial", 11)
 	popup.add_item("Resetear progreso local", 12)
 	popup.add_item("Salir", 13)
 	if DebugConfigScript.SHOW_VERSION:
@@ -245,10 +254,114 @@ func show_message(text: String) -> void:
 
 
 func _apply_styles() -> void:
-	UIThemeScript.apply_dark_panel_style(top_bar)
+	_apply_premium_top_bar()
 	for label in [room_name_label, role_label, coins_label, help_text, saved_label, message_label]:
-		UIThemeScript.apply_label(label)
+		_apply_premium_label(label)
+	_style_header_label(room_name_label)
+	_style_badge_label(role_label, COLOR_HUD_GOLD)
+	_style_badge_label(coins_label, COLOR_HUD_GOLD)
 	for button in $Root/TopBar/MarginContainer/HBoxContainer.get_children():
 		if button is Button:
-			UIThemeScript.apply_secondary_button(button)
-	UIThemeScript.apply_primary_button(decorate_button)
+			_style_premium_button(button, COLOR_HUD_BUTTON)
+	menu_button.text = "Menú"
+	decorate_button.text = "Decora"
+	_style_premium_button(menu_button, COLOR_HUD_BUTTON, "blue")
+	_style_premium_button(decorate_button, COLOR_HUD_BUTTON_HOT, "cyan")
+	UIThemeScript.apply_button_icon(menu_button, "menu")
+	UIThemeScript.apply_button_icon(decorate_button, "decorate")
+	if has_node("Root/TopBar/MarginContainer/HBoxContainer/InventoryButton"):
+		var inventory_button: Button = $Root/TopBar/MarginContainer/HBoxContainer/InventoryButton
+		inventory_button.text = "Inventario"
+		_style_premium_button(inventory_button, Color(0.05, 0.28, 0.52, 1.0), "blue")
+		UIThemeScript.apply_button_icon(inventory_button, "inventory")
+	help_text.add_theme_color_override("font_color", COLOR_HUD_MUTED)
+	saved_label.add_theme_color_override("font_color", Color(0.65, 1.0, 0.76, 1.0))
+	message_label.add_theme_color_override("font_color", COLOR_HUD_TEXT)
+
+
+func _apply_premium_top_bar() -> void:
+	top_bar.custom_minimum_size = Vector2(0, 68)
+	top_bar.offset_bottom = 68.0
+	top_bar.add_theme_stylebox_override("panel", _make_premium_stylebox(COLOR_HUD_BG, 2, COLOR_HUD_BORDER, 3))
+	UIThemeScript.apply_texture_panel_style(top_bar, "panel_blue_9slice", 8)
+	var margin: MarginContainer = $Root/TopBar/MarginContainer
+	margin.add_theme_constant_override("margin_left", 14)
+	margin.add_theme_constant_override("margin_top", 9)
+	margin.add_theme_constant_override("margin_right", 14)
+	margin.add_theme_constant_override("margin_bottom", 9)
+	var row: HBoxContainer = $Root/TopBar/MarginContainer/HBoxContainer
+	row.add_theme_constant_override("separation", 12)
+
+
+func _apply_premium_label(label: Label) -> void:
+	label.add_theme_color_override("font_color", COLOR_HUD_TEXT)
+	label.add_theme_font_size_override("font_size", 17)
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+
+
+func _style_header_label(label: Label) -> void:
+	label.custom_minimum_size = Vector2(260, 46)
+	label.add_theme_font_size_override("font_size", 28)
+	label.add_theme_color_override("font_color", COLOR_HUD_TEXT)
+
+
+func _style_badge_label(label: Label, accent: Color) -> void:
+	label.custom_minimum_size = Vector2(132, 42)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 17)
+	label.add_theme_stylebox_override("normal", _make_premium_stylebox(COLOR_HUD_BUTTON, 2, accent, 2))
+
+
+func _style_premium_button(button: Button, color: Color, texture_variant: String = "blue") -> void:
+	button.custom_minimum_size = Vector2(maxf(button.custom_minimum_size.x, 118.0), 42)
+	button.add_theme_font_size_override("font_size", 17)
+	button.add_theme_color_override("font_color", COLOR_HUD_TEXT)
+	button.add_theme_color_override("font_disabled_color", COLOR_HUD_MUTED)
+	button.add_theme_stylebox_override("normal", _make_premium_stylebox(color, 2, COLOR_HUD_BORDER, 2))
+	button.add_theme_stylebox_override("hover", _make_premium_stylebox(color.lightened(0.12), 2, COLOR_HUD_GOLD, 2))
+	button.add_theme_stylebox_override("pressed", _make_premium_stylebox(color.darkened(0.10), 2, COLOR_HUD_BORDER.darkened(0.10), 2))
+	button.add_theme_stylebox_override("disabled", _make_premium_stylebox(COLOR_HUD_BUTTON.darkened(0.26), 2, COLOR_HUD_BORDER.darkened(0.35), 1))
+	UIThemeScript.apply_texture_button_style(button, texture_variant, 8)
+
+
+func _apply_decorate_button_state(enabled: bool) -> void:
+	if enabled:
+		_style_premium_button(decorate_button, Color(0.05, 0.62, 0.95, 1.0), "cyan")
+	else:
+		_style_premium_button(decorate_button, COLOR_HUD_BUTTON_HOT, "cyan")
+
+
+func _apply_premium_popup_style(popup: PopupMenu) -> void:
+	popup.min_size = Vector2i(300, 0)
+	popup.add_theme_stylebox_override("panel", _make_premium_stylebox(COLOR_HUD_BG_DARK, 2, COLOR_HUD_BORDER, 3))
+	var popup_panel_texture := UIThemeScript.load_ui_texture("res://assets/ui/panels/panel_dark_9slice.png")
+	if popup_panel_texture:
+		popup.add_theme_stylebox_override("panel", UIThemeScript.make_texture_style(popup_panel_texture, 8))
+	popup.add_theme_stylebox_override("hover", _make_premium_stylebox(COLOR_HUD_BUTTON_HOT.darkened(0.12), 2, COLOR_HUD_GOLD, 1))
+	popup.add_theme_color_override("font_color", COLOR_HUD_TEXT)
+	popup.add_theme_color_override("font_hover_color", COLOR_HUD_TEXT)
+	popup.add_theme_color_override("font_disabled_color", COLOR_HUD_MUTED)
+	popup.add_theme_color_override("font_separator_color", COLOR_HUD_BORDER)
+	popup.add_theme_font_size_override("font_size", 16)
+	popup.add_theme_constant_override("v_separation", 8)
+	popup.add_theme_constant_override("item_start_padding", 18)
+	popup.add_theme_constant_override("item_end_padding", 22)
+
+
+func _make_premium_stylebox(color: Color, radius: int, border_color: Color, border_width: int) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = color
+	style.corner_radius_top_left = radius
+	style.corner_radius_top_right = radius
+	style.corner_radius_bottom_left = radius
+	style.corner_radius_bottom_right = radius
+	style.border_color = border_color
+	style.border_width_left = border_width
+	style.border_width_top = border_width
+	style.border_width_right = border_width
+	style.border_width_bottom = border_width
+	style.content_margin_left = 10
+	style.content_margin_right = 10
+	style.content_margin_top = 6
+	style.content_margin_bottom = 6
+	return style
