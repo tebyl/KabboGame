@@ -14,13 +14,13 @@ const UIThemeScript := preload("res://scripts/ui/UITheme.gd")
 const PermissionManagerScript := preload("res://scripts/data/PermissionManager.gd")
 const WINDOW_MIN_SIZE := Vector2(900, 560)
 const WINDOW_PADDING := Vector2(80, 70)
-const CARD_HEIGHT := 158
-const THUMBNAIL_SIZE := Vector2(120, 90)
+const CARD_HEIGHT := 164
+const THUMBNAIL_SIZE := Vector2(104, 104)
 const COLOR_WINDOW_BG := Color(0.05, 0.09, 0.17, 0.98)
 const COLOR_WINDOW_BORDER := Color(0.22, 0.62, 0.95, 1.0)
 const COLOR_WINDOW_INNER := Color(0.10, 0.18, 0.32, 1.0)
-const COLOR_CARD_BG := Color(0.06, 0.12, 0.22, 1.0)
-const COLOR_CARD_BORDER := Color(0.20, 0.46, 0.78, 1.0)
+const COLOR_CARD_BG := Color(0.035, 0.085, 0.17, 1.0)
+const COLOR_CARD_BORDER := Color(0.18, 0.66, 0.95, 1.0)
 const COLOR_CARD_ACCENT := Color(0.96, 0.78, 0.25, 1.0)
 const COLOR_INPUT_BG := Color(0.04, 0.08, 0.14, 1.0)
 const COLOR_INPUT_BORDER := Color(0.20, 0.42, 0.70, 1.0)
@@ -28,6 +28,8 @@ const COLOR_TEXT_PRIMARY := Color(0.95, 0.98, 1.0, 1.0)
 const COLOR_TEXT_MUTED := Color(0.65, 0.74, 0.86, 1.0)
 const COLOR_BADGE_BG := Color(0.12, 0.22, 0.36, 1.0)
 const COLOR_BADGE_BORDER := Color(0.40, 0.62, 0.88, 1.0)
+const COLOR_ENTER_BUTTON := Color(0.05, 0.48, 0.92, 1.0)
+const COLOR_EXPORT_BUTTON := Color(0.06, 0.40, 0.62, 1.0)
 const ROOM_TYPES := [
 	{ "value": "", "label": "Todos los tipos" },
 	{ "value": "social", "label": "Social" },
@@ -70,7 +72,7 @@ var selected_room_mood := ""
 
 
 func _ready() -> void:
-	$Root/Overlay.color = UIThemeScript.COLOR_OVERLAY
+	$Root/Overlay.color = Color(0.0, 0.0, 0.0, 0.70)
 	_apply_window_style(card)
 	_apply_static_styles()
 	_populate_filter_options(type_filter, ROOM_TYPES)
@@ -104,15 +106,21 @@ func _render_rooms() -> void:
 	for child in room_list.get_children():
 		child.queue_free()
 
+	var rendered_count := 0
 	for room in rooms:
 		if typeof(room) == TYPE_DICTIONARY:
 			if _matches_filters(room):
 				room_list.add_child(_build_room_row(room))
+				rendered_count += 1
+
+	if rendered_count == 1:
+		room_list.add_child(_make_single_room_hint())
 
 
 func _build_room_row(room: Dictionary) -> PanelContainer:
 	var row := PanelContainer.new()
 	row.custom_minimum_size = Vector2(0, CARD_HEIGHT)
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var is_current := String(room.get("id", "")) == current_room_id
 	_apply_card_style(row, is_current)
 
@@ -124,7 +132,7 @@ func _build_room_row(room: Dictionary) -> PanelContainer:
 	row.add_child(margin)
 
 	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 8)
+	vbox.add_theme_constant_override("separation", 7)
 	margin.add_child(vbox)
 
 	var top_row := HBoxContainer.new()
@@ -141,6 +149,7 @@ func _build_room_row(room: Dictionary) -> PanelContainer:
 
 	var room_id := String(room.get("id", ""))
 	var role := PermissionManagerScript.sanitize_role(String(room.get("local_role", PermissionManagerScript.ROLE_OWNER)))
+	var role_label := _format_role_label(role)
 	var can_rename := PermissionManagerScript.can_rename_room(role)
 	var can_duplicate := PermissionManagerScript.can_duplicate_room(role)
 	var can_delete := PermissionManagerScript.can_delete_room(role)
@@ -152,44 +161,48 @@ func _build_room_row(room: Dictionary) -> PanelContainer:
 	var title := Label.new()
 	title.text = String(room.get("name", "Sala"))
 	title.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	title.add_theme_font_size_override("font_size", 18)
+	title.add_theme_font_size_override("font_size", 19)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.clip_text = true
 	title_row.add_child(title)
 
 	if is_current:
 		var badge := _make_badge("Actual", COLOR_CARD_ACCENT)
 		title_row.add_child(badge)
 
+	var furniture_count := (room.get("furniture", []) as Array).size()
 	var detail := Label.new()
-	detail.text = "📐 %sx%s   🛋 %s   %s / %s" % [
+	detail.text = "%sx%s  ·  %s muebles  ·  %s / %s" % [
 		int(room.get("width", 10)),
 		int(room.get("height", 10)),
-		(room.get("furniture", []) as Array).size(),
+		furniture_count,
 		_format_room_type(String(room.get("room_type", "social"))),
 		_format_room_mood(String(room.get("mood", "relajada"))),
 	]
 	detail.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
+	detail.add_theme_font_size_override("font_size", 13)
 	labels.add_child(detail)
 
 	var role_detail := Label.new()
-	role_detail.text = "%s - %s" % [
-		String(room.get("owner_name", "Invitado")),
-		"Dueño" if role == PermissionManagerScript.ROLE_OWNER else "Visitante",
-	]
+	role_detail.text = String(room.get("owner_name", "Invitado"))
 	role_detail.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
+	role_detail.add_theme_font_size_override("font_size", 13)
 	labels.add_child(role_detail)
 
 	var rename_row := HBoxContainer.new()
-	rename_row.add_theme_constant_override("separation", 6)
+	rename_row.add_theme_constant_override("separation", 8)
 	labels.add_child(rename_row)
 
 	var rename_input := LineEdit.new()
 	rename_input.text = String(room.get("name", "Sala"))
 	rename_input.max_length = 24
-	rename_input.custom_minimum_size = Vector2(210, 0)
+	rename_input.custom_minimum_size = Vector2(250, 32)
+	rename_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_apply_input_style(rename_input)
 	rename_row.add_child(rename_input)
 
-	var rename_button := _make_button("✎ Renombrar", "secondary")
+	var rename_button := _make_button("Renombrar", "secondary")
+	rename_button.custom_minimum_size = Vector2(112, 32)
 	rename_button.disabled = not can_rename
 	rename_button.pressed.connect(_on_rename_pressed.bind(room_id, rename_input))
 	rename_row.add_child(rename_button)
@@ -197,36 +210,47 @@ func _build_room_row(room: Dictionary) -> PanelContainer:
 	var right_panel := VBoxContainer.new()
 	right_panel.add_theme_constant_override("separation", 8)
 	right_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	right_panel.alignment = BoxContainer.ALIGNMENT_CENTER
 	top_row.add_child(right_panel)
 
 	var enter_button := Button.new()
-	enter_button.text = "Entrar"
-	enter_button.disabled = room_id == current_room_id
-	enter_button.custom_minimum_size = Vector2(140, 46)
+	enter_button.text = "En sala" if is_current else "Entrar"
+	enter_button.disabled = is_current
+	enter_button.custom_minimum_size = Vector2(122, 62)
 	_apply_primary_big_button(enter_button)
+	if is_current:
+		_apply_current_enter_button(enter_button)
 	enter_button.pressed.connect(_on_enter_pressed.bind(room_id))
 	right_panel.add_child(enter_button)
 
 	var actions := HBoxContainer.new()
-	actions.add_theme_constant_override("separation", 8)
+	actions.add_theme_constant_override("separation", 7)
 	vbox.add_child(actions)
 
-	var duplicate_button := _make_button("⧉ Duplicar", "secondary")
+	var duplicate_button := _make_button("Duplicar", "secondary")
+	duplicate_button.custom_minimum_size = Vector2(100, 32)
 	duplicate_button.disabled = not can_duplicate
 	duplicate_button.pressed.connect(_on_duplicate_pressed.bind(room_id))
 	actions.add_child(duplicate_button)
 
-	var export_button := _make_button("⬆ Exportar", "secondary")
+	var export_button := _make_button("Exportar", "export")
+	export_button.custom_minimum_size = Vector2(100, 32)
 	export_button.disabled = not can_export
 	export_button.pressed.connect(_on_export_pressed.bind(room_id))
 	actions.add_child(export_button)
 
-	var delete_button := _make_button("🗑 Borrar", "danger")
+	var delete_button := _make_button("Borrar", "danger")
+	delete_button.custom_minimum_size = Vector2(100, 32)
 	delete_button.disabled = rooms.size() <= 1 or not can_delete
 	delete_button.pressed.connect(_on_delete_pressed.bind(room_id))
 	actions.add_child(delete_button)
 
-	var toggle_role_button := _make_button("Rol: %s" % ["Visitante" if role == PermissionManagerScript.ROLE_OWNER else "Dueño"], "secondary")
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	actions.add_child(spacer)
+
+	var toggle_role_button := _make_button("Rol: %s" % role_label, "badge")
+	toggle_role_button.custom_minimum_size = Vector2(122, 32)
 	toggle_role_button.pressed.connect(_on_toggle_role_pressed.bind(room_id))
 	actions.add_child(toggle_role_button)
 
@@ -235,7 +259,7 @@ func _build_room_row(room: Dictionary) -> PanelContainer:
 
 func _apply_static_styles() -> void:
 	var title_label: Label = $Root/Card/Margin/VBox/Header/Title
-	title_label.text = "🏠  Mis salas"
+	title_label.text = "Mis salas"
 	title_label.add_theme_font_size_override("font_size", 22)
 	title_label.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
 
@@ -243,11 +267,11 @@ func _apply_static_styles() -> void:
 	close_button.text = "Cerrar"
 	_apply_danger_button(close_button)
 
-	search_input.placeholder_text = "🔍 Buscar por sala o dueño"
-	search_input.custom_minimum_size = Vector2(360, 0)
+	search_input.placeholder_text = "Buscar por sala o dueño"
+	search_input.custom_minimum_size = Vector2(360, 36)
 	_apply_input_style(search_input)
-	type_filter.custom_minimum_size = Vector2(180, 0)
-	mood_filter.custom_minimum_size = Vector2(180, 0)
+	type_filter.custom_minimum_size = Vector2(180, 36)
+	mood_filter.custom_minimum_size = Vector2(180, 36)
 	_apply_dropdown_style(type_filter)
 	_apply_dropdown_style(mood_filter)
 	UIThemeScript.apply_popup_menu_style(type_filter.get_popup())
@@ -255,16 +279,16 @@ func _apply_static_styles() -> void:
 
 	var create_button: Button = $Root/Card/Margin/VBox/CreateForm/CreateButton
 	create_button.text = "+ Crear"
-	create_button.custom_minimum_size = Vector2(120, 36)
+	create_button.custom_minimum_size = Vector2(122, 40)
 	_apply_success_button(create_button)
 
 	var import_button: Button = $Root/Card/Margin/VBox/Actions/ImportButton
-	import_button.text = "⬇ Importar sala"
-	import_button.custom_minimum_size = Vector2(220, 40)
+	import_button.text = "Importar sala"
+	import_button.custom_minimum_size = Vector2(220, 42)
 	_apply_primary_button(import_button)
 
-	export_current_button.text = "⬆ Exportar actual"
-	export_current_button.custom_minimum_size = Vector2(220, 40)
+	export_current_button.text = "Exportar actual"
+	export_current_button.custom_minimum_size = Vector2(220, 42)
 	_apply_primary_button(export_current_button)
 
 	_apply_input_style(name_input)
@@ -272,15 +296,17 @@ func _apply_static_styles() -> void:
 	_apply_spinbox_style(height_input)
 
 	name_input.text = "Nueva Sala"
-	name_input.placeholder_text = "＋ Nueva sala"
-	name_input.custom_minimum_size = Vector2(320, 0)
+	name_input.placeholder_text = "Nueva sala"
+	name_input.custom_minimum_size = Vector2(320, 40)
 	name_input.max_length = 24
 	width_input.min_value = 6
 	width_input.max_value = 16
 	width_input.value = 10
+	width_input.custom_minimum_size = Vector2(92, 40)
 	height_input.min_value = 6
 	height_input.max_value = 16
 	height_input.value = 10
+	height_input.custom_minimum_size = Vector2(92, 40)
 	_apply_scroll_style(rooms_scroll)
 	room_list.add_theme_constant_override("separation", 12)
 
@@ -314,6 +340,10 @@ func _make_button(text: String, kind: String) -> Button:
 	match kind:
 		"danger":
 			_apply_danger_button(button)
+		"export":
+			_apply_export_button(button)
+		"badge":
+			_apply_badge_button(button)
 		"success":
 			_apply_success_button(button)
 		_:
@@ -322,12 +352,12 @@ func _make_button(text: String, kind: String) -> Button:
 
 
 func _apply_window_style(panel: PanelContainer) -> void:
-	panel.add_theme_stylebox_override("panel", _make_stylebox(COLOR_WINDOW_BG, 14, COLOR_WINDOW_BORDER, 2))
+	panel.add_theme_stylebox_override("panel", _make_stylebox(COLOR_WINDOW_BG, 12, COLOR_WINDOW_BORDER, 3))
 
 
 func _apply_card_style(panel: PanelContainer, is_current: bool) -> void:
 	var border_color := COLOR_CARD_ACCENT if is_current else COLOR_CARD_BORDER
-	panel.add_theme_stylebox_override("panel", _make_stylebox(COLOR_CARD_BG, 12, border_color, 2))
+	panel.add_theme_stylebox_override("panel", _make_stylebox(COLOR_CARD_BG, 8, border_color, 3))
 
 
 func _apply_primary_button(button: Button) -> void:
@@ -346,37 +376,51 @@ func _apply_danger_button(button: Button) -> void:
 	_apply_button_style(button, UIThemeScript.COLOR_DANGER)
 
 
+func _apply_export_button(button: Button) -> void:
+	_apply_button_style(button, COLOR_EXPORT_BUTTON)
+
+
+func _apply_badge_button(button: Button) -> void:
+	_apply_button_style(button, COLOR_BADGE_BG)
+
+
 func _apply_primary_big_button(button: Button) -> void:
-	_apply_primary_button(button)
-	button.add_theme_font_size_override("font_size", 16)
+	_apply_button_style(button, COLOR_ENTER_BUTTON)
+	button.add_theme_font_size_override("font_size", 18)
+
+
+func _apply_current_enter_button(button: Button) -> void:
+	button.add_theme_color_override("font_disabled_color", Color(0.78, 0.86, 0.95, 1.0))
+	button.add_theme_stylebox_override("disabled", _make_stylebox(COLOR_WINDOW_INNER.darkened(0.24), 8, COLOR_CARD_BORDER.darkened(0.10), 2))
 
 
 func _apply_button_style(button: Button, color: Color) -> void:
 	button.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	button.add_theme_stylebox_override("normal", _make_stylebox(color, 10, color.lightened(0.16), 1))
-	button.add_theme_stylebox_override("hover", _make_stylebox(color.lightened(0.12), 10, color.lightened(0.22), 1))
-	button.add_theme_stylebox_override("pressed", _make_stylebox(color.darkened(0.12), 10, color.lightened(0.1), 1))
-	button.add_theme_stylebox_override("disabled", _make_stylebox(UIThemeScript.COLOR_SECONDARY.darkened(0.3), 10, UIThemeScript.COLOR_SECONDARY.darkened(0.1), 1))
+	button.add_theme_color_override("font_disabled_color", COLOR_TEXT_MUTED)
+	button.add_theme_stylebox_override("normal", _make_stylebox(color, 8, color.lightened(0.18), 2))
+	button.add_theme_stylebox_override("hover", _make_stylebox(color.lightened(0.12), 8, color.lightened(0.28), 2))
+	button.add_theme_stylebox_override("pressed", _make_stylebox(color.darkened(0.12), 8, color.lightened(0.1), 2))
+	button.add_theme_stylebox_override("disabled", _make_stylebox(UIThemeScript.COLOR_SECONDARY.darkened(0.36), 8, UIThemeScript.COLOR_SECONDARY.darkened(0.08), 1))
 
 
 func _apply_input_style(input: LineEdit) -> void:
 	input.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
 	input.add_theme_color_override("font_placeholder_color", COLOR_TEXT_MUTED)
-	input.add_theme_stylebox_override("normal", _make_stylebox(COLOR_INPUT_BG, 8, COLOR_INPUT_BORDER, 1))
-	input.add_theme_stylebox_override("focus", _make_stylebox(COLOR_INPUT_BG.lightened(0.05), 8, COLOR_WINDOW_BORDER, 1))
+	input.add_theme_stylebox_override("normal", _make_stylebox(COLOR_INPUT_BG, 8, COLOR_INPUT_BORDER, 2))
+	input.add_theme_stylebox_override("focus", _make_stylebox(COLOR_INPUT_BG.lightened(0.05), 8, COLOR_WINDOW_BORDER, 2))
 
 
 func _apply_dropdown_style(dropdown: OptionButton) -> void:
 	dropdown.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	dropdown.add_theme_stylebox_override("normal", _make_stylebox(COLOR_INPUT_BG, 8, COLOR_INPUT_BORDER, 1))
-	dropdown.add_theme_stylebox_override("hover", _make_stylebox(COLOR_INPUT_BG.lightened(0.06), 8, COLOR_WINDOW_BORDER, 1))
-	dropdown.add_theme_stylebox_override("pressed", _make_stylebox(COLOR_INPUT_BG.lightened(0.1), 8, COLOR_WINDOW_BORDER, 1))
+	dropdown.add_theme_stylebox_override("normal", _make_stylebox(COLOR_INPUT_BG, 8, COLOR_INPUT_BORDER, 2))
+	dropdown.add_theme_stylebox_override("hover", _make_stylebox(COLOR_INPUT_BG.lightened(0.06), 8, COLOR_WINDOW_BORDER, 2))
+	dropdown.add_theme_stylebox_override("pressed", _make_stylebox(COLOR_INPUT_BG.lightened(0.1), 8, COLOR_WINDOW_BORDER, 2))
 
 
 func _apply_spinbox_style(spinbox: SpinBox) -> void:
 	spinbox.add_theme_color_override("font_color", COLOR_TEXT_PRIMARY)
-	spinbox.add_theme_stylebox_override("normal", _make_stylebox(COLOR_INPUT_BG, 8, COLOR_INPUT_BORDER, 1))
-	spinbox.add_theme_stylebox_override("focus", _make_stylebox(COLOR_INPUT_BG.lightened(0.05), 8, COLOR_WINDOW_BORDER, 1))
+	spinbox.add_theme_stylebox_override("normal", _make_stylebox(COLOR_INPUT_BG, 8, COLOR_INPUT_BORDER, 2))
+	spinbox.add_theme_stylebox_override("focus", _make_stylebox(COLOR_INPUT_BG.lightened(0.05), 8, COLOR_WINDOW_BORDER, 2))
 	var line_edit := spinbox.get_line_edit()
 	if line_edit:
 		_apply_input_style(line_edit)
@@ -415,55 +459,134 @@ func _make_badge(text: String, accent: Color) -> PanelContainer:
 	return badge
 
 
+func _make_single_room_hint() -> Label:
+	var hint := Label.new()
+	hint.text = "Crea una nueva sala para empezar otra decoración."
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.add_theme_color_override("font_color", COLOR_TEXT_MUTED.darkened(0.10))
+	hint.add_theme_font_size_override("font_size", 13)
+	hint.custom_minimum_size = Vector2(0, 30)
+	return hint
+
+
 func _build_room_thumbnail(room: Dictionary, is_current: bool) -> PanelContainer:
 	var frame := PanelContainer.new()
 	frame.custom_minimum_size = THUMBNAIL_SIZE
-	frame.add_theme_stylebox_override("panel", _make_stylebox(COLOR_WINDOW_INNER, 10, COLOR_CARD_ACCENT if is_current else COLOR_CARD_BORDER, 2))
+	frame.add_theme_stylebox_override("panel", _make_stylebox(Color(0.025, 0.055, 0.11, 1.0), 8, COLOR_CARD_ACCENT if is_current else COLOR_CARD_BORDER, 3))
 
 	var art := Control.new()
 	art.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	art.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	frame.add_child(art)
 
-	var wall := Polygon2D.new()
-	wall.polygon = PackedVector2Array([
-		Vector2(18, 30),
-		Vector2(60, 10),
-		Vector2(102, 30),
-		Vector2(60, 50),
+	var left_wall := Polygon2D.new()
+	left_wall.polygon = PackedVector2Array([
+		Vector2(13, 32),
+		Vector2(52, 12),
+		Vector2(52, 47),
+		Vector2(13, 67),
 	])
-	wall.color = Color(0.08, 0.14, 0.24, 1.0)
-	art.add_child(wall)
+	left_wall.color = Color(0.07, 0.14, 0.25, 1.0)
+	art.add_child(left_wall)
+
+	var right_wall := Polygon2D.new()
+	right_wall.polygon = PackedVector2Array([
+		Vector2(52, 12),
+		Vector2(92, 32),
+		Vector2(92, 67),
+		Vector2(52, 47),
+	])
+	right_wall.color = Color(0.08, 0.17, 0.30, 1.0)
+	art.add_child(right_wall)
+
+	var wall_trim := Line2D.new()
+	wall_trim.points = PackedVector2Array([
+		Vector2(13, 32),
+		Vector2(52, 12),
+		Vector2(92, 32),
+	])
+	wall_trim.width = 2.0
+	wall_trim.default_color = COLOR_CARD_ACCENT.darkened(0.18)
+	art.add_child(wall_trim)
 
 	var floor := Polygon2D.new()
 	floor.polygon = PackedVector2Array([
-		Vector2(18, 50),
-		Vector2(60, 30),
-		Vector2(102, 50),
-		Vector2(60, 70),
+		Vector2(13, 67),
+		Vector2(52, 47),
+		Vector2(92, 67),
+		Vector2(52, 92),
 	])
-	floor.color = Color(0.12, 0.22, 0.32, 1.0)
+	floor.color = Color(0.14, 0.30, 0.42, 1.0)
 	art.add_child(floor)
+
+	var floor_highlight := Polygon2D.new()
+	floor_highlight.polygon = PackedVector2Array([
+		Vector2(25, 67),
+		Vector2(52, 54),
+		Vector2(80, 67),
+		Vector2(52, 84),
+	])
+	floor_highlight.color = Color(0.19, 0.39, 0.52, 1.0)
+	art.add_child(floor_highlight)
+
+	for points in [
+		PackedVector2Array([Vector2(25, 67), Vector2(52, 84)]),
+		PackedVector2Array([Vector2(39, 60), Vector2(67, 77)]),
+		PackedVector2Array([Vector2(52, 54), Vector2(80, 67)]),
+		PackedVector2Array([Vector2(38, 74), Vector2(66, 60)]),
+	]:
+		var grid_line := Line2D.new()
+		grid_line.points = points
+		grid_line.width = 1.0
+		grid_line.default_color = Color(0.32, 0.62, 0.76, 0.45)
+		art.add_child(grid_line)
 
 	var furniture_count := (room.get("furniture", []) as Array).size()
 	if furniture_count > 0:
 		var sofa := ColorRect.new()
 		sofa.color = Color(0.22, 0.64, 0.82, 1.0)
-		sofa.position = Vector2(32, 50)
-		sofa.size = Vector2(22, 8)
+		sofa.position = Vector2(28, 64)
+		sofa.size = Vector2(29, 10)
 		art.add_child(sofa)
+
+		var sofa_back := ColorRect.new()
+		sofa_back.color = Color(0.10, 0.36, 0.58, 1.0)
+		sofa_back.position = Vector2(28, 58)
+		sofa_back.size = Vector2(29, 7)
+		art.add_child(sofa_back)
+
+		var table := ColorRect.new()
+		table.color = COLOR_CARD_ACCENT
+		table.position = Vector2(60, 70)
+		table.size = Vector2(16, 7)
+		art.add_child(table)
 
 		var plant := ColorRect.new()
 		plant.color = Color(0.2, 0.78, 0.4, 1.0)
-		plant.position = Vector2(66, 46)
-		plant.size = Vector2(9, 12)
+		plant.position = Vector2(75, 48)
+		plant.size = Vector2(9, 16)
 		art.add_child(plant)
 	else:
+		var window_glow := ColorRect.new()
+		window_glow.color = Color(0.16, 0.45, 0.66, 0.75)
+		window_glow.position = Vector2(66, 30)
+		window_glow.size = Vector2(13, 18)
+		art.add_child(window_glow)
+
 		var empty_mark := Label.new()
 		empty_mark.text = "Sala vacía"
 		empty_mark.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
-		empty_mark.position = Vector2(10, 52)
+		empty_mark.add_theme_font_size_override("font_size", 11)
+		empty_mark.position = Vector2(24, 78)
 		art.add_child(empty_mark)
+
+	if is_current:
+		var current_tag := Label.new()
+		current_tag.text = "Actual"
+		current_tag.add_theme_color_override("font_color", COLOR_CARD_ACCENT)
+		current_tag.add_theme_font_size_override("font_size", 11)
+		current_tag.position = Vector2(8, 7)
+		art.add_child(current_tag)
 
 	return frame
 
@@ -514,6 +637,10 @@ func _format_room_mood(mood: String) -> String:
 		if String(entry.get("value", "")) == mood:
 			return String(entry.get("label", "Relajada"))
 	return "Relajada"
+
+
+func _format_role_label(role: String) -> String:
+	return "Dueño" if PermissionManagerScript.sanitize_role(role) == PermissionManagerScript.ROLE_OWNER else "Visitante"
 
 
 func _on_enter_pressed(room_id: String) -> void:
