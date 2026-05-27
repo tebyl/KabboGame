@@ -53,6 +53,8 @@ static func import_room_from_file() -> Dictionary:
 		return {}
 	if String(json.data.get("format", "")) != FORMAT:
 		return {}
+	if int(json.data.get("version", 0)) != VERSION:
+		return {}
 	if not json.data.has("room") or typeof(json.data.get("room")) != TYPE_DICTIONARY:
 		return {}
 	return json.data.get("room", {})

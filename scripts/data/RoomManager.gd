@@ -410,10 +410,10 @@ func _make_center_cell(width: int, height: int) -> Dictionary:
 
 
 func _make_unique_room_id() -> String:
-	var attempt := "room_%s" % Time.get_ticks_msec()
+	var attempt := "room_%s_%s" % [Time.get_ticks_msec(), randi()]
 	var suffix := 1
 	while not get_room(attempt).is_empty():
-		attempt = "room_%s_%s" % [Time.get_ticks_msec(), suffix]
+		attempt = "room_%s_%s_%s" % [Time.get_ticks_msec(), randi(), suffix]
 		suffix += 1
 	return attempt
 
@@ -479,6 +479,8 @@ func _sanitize_furniture_list(value) -> Array:
 			continue
 		var furniture_type := String(entry.get("type", "")).strip_edges()
 		if furniture_type.is_empty():
+			continue
+		if FurnitureCatalogScript.get_item(furniture_type).is_empty():
 			continue
 		var cell = entry.get("cell", {})
 		if not (cell is Dictionary or cell is Vector2i):

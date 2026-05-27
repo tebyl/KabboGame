@@ -4,10 +4,13 @@ signal chat_submitted(text: String)
 signal chat_focus_changed(focused: bool)
 
 const UIThemeScript := preload("res://scripts/ui/UITheme.gd")
+const ChatManagerScript := preload("res://scripts/data/ChatManager.gd")
+const MAX_TEXT_LENGTH := ChatManagerScript.MAX_TEXT_LENGTH
 const MAX_VISIBLE_MESSAGES := 40
 
 var minimized := false
 var last_message_text := "Chat"
+var counter_label: Label
 
 @onready var chat_card: PanelContainer = $Root/ChatCard
 @onready var title_label: Label = $Root/ChatCard/Margin/VBox/Header/Title
@@ -26,9 +29,13 @@ func _ready() -> void:
 	UIThemeScript.apply_label(minimized_label, true)
 	UIThemeScript.apply_secondary_button(minimize_button)
 	UIThemeScript.apply_primary_button(send_button)
+	chat_input.max_length = MAX_TEXT_LENGTH
 	chat_input.text_submitted.connect(_on_text_submitted)
+	chat_input.text_changed.connect(_on_text_changed)
 	chat_input.focus_entered.connect(_on_input_focus_entered)
 	chat_input.focus_exited.connect(_on_input_focus_exited)
+	_setup_counter_label()
+	_update_input_state()
 	_apply_minimized_state()
 
 
@@ -71,6 +78,7 @@ func set_minimized(value: bool) -> void:
 
 func clear_input() -> void:
 	chat_input.text = ""
+	_update_input_state()
 
 
 func _on_text_submitted(text: String) -> void:
@@ -99,6 +107,29 @@ func _on_input_focus_entered() -> void:
 
 func _on_input_focus_exited() -> void:
 	chat_focus_changed.emit(false)
+
+
+func _on_text_changed(_text: String) -> void:
+	_update_input_state()
+
+
+func _setup_counter_label() -> void:
+	counter_label = Label.new()
+	UIThemeScript.apply_label(counter_label, true)
+	counter_label.custom_minimum_size = Vector2(64, 0)
+	counter_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	input_row.add_child(counter_label)
+	var send_index := input_row.get_children().find(send_button)
+	if send_index != -1:
+		input_row.move_child(counter_label, send_index)
+
+
+func _update_input_state() -> void:
+	if not counter_label:
+		return
+	var length := chat_input.text.strip_edges().length()
+	counter_label.text = "%s/%s" % [length, MAX_TEXT_LENGTH]
+	send_button.disabled = length == 0
 
 
 func _scroll_to_bottom() -> void:

@@ -25,6 +25,7 @@ const WallRendererScript := preload("res://scripts/room/WallRenderer.gd")
 const FurnitureFootprintScript := preload("res://scripts/room/FurnitureFootprint.gd")
 const FloorRendererScript := preload("res://scripts/room/FloorRenderer.gd")
 const IsoGridScript := preload("res://scripts/room/IsoGrid.gd")
+const UiFeedbackScript := preload("res://scripts/ui/UiFeedback.gd")
 const FurniturePreviewScene := preload("res://scenes/room/FurniturePreview.tscn")
 const TILE_WIDTH := 64
 const TILE_HEIGHT := 32
@@ -120,6 +121,16 @@ func _unhandled_input(event: InputEvent) -> void:
 			update_move_preview(get_local_mouse_position())
 		else:
 			update_furniture_preview(get_local_mouse_position())
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+		if decoration_mode:
+			if is_moving_selected_furniture():
+				cancel_move_selected_furniture()
+			elif has_active_preview:
+				cancel_furniture_preview()
+			elif not selected_furniture_id.is_empty():
+				clear_furniture_selection()
+			get_viewport().set_input_as_handled()
+		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		var cell := IsoGridScript.world_to_grid(get_local_mouse_position(), TILE_WIDTH, TILE_HEIGHT)
 		if not is_cell_inside_room(cell) and not (decoration_mode and has_active_preview):
@@ -229,6 +240,7 @@ func move_player_to_cell(cell: Vector2i) -> void:
 	if path.is_empty():
 		movement_failed.emit("sin_ruta")
 		return
+	_show_walk_target(cell)
 	start_player_path(path)
 
 
@@ -868,6 +880,29 @@ func confirm_furniture_preview() -> void:
 	furniture_place_requested.emit(preview_furniture_type, preview_cell, preview_rotation)
 
 
+func _show_walk_target(cell: Vector2i) -> void:
+	var marker := Node2D.new()
+	var diamond := Polygon2D.new()
+	diamond.polygon = FurnitureFootprintScript.get_footprint_polygon(Vector2i.ONE, 0, TILE_WIDTH, TILE_HEIGHT)
+	diamond.color = Color(0.25, 0.9, 1.0, 0.35)
+	marker.add_child(diamond)
+	var outline := Line2D.new()
+	var outline_points := diamond.polygon.duplicate()
+	if outline_points.size() > 0:
+		outline_points.append(outline_points[0])
+	outline.points = outline_points
+	outline.default_color = Color(0.55, 1.0, 1.0, 0.95)
+	outline.width = 2.0
+	marker.add_child(outline)
+	add_child(marker)
+	marker.position = IsoGridScript.grid_to_world(cell, TILE_WIDTH, TILE_HEIGHT)
+	marker.z_index = int(marker.position.y) + 2
+	UiFeedbackScript.pulse(marker)
+	var tween := marker.create_tween()
+	tween.tween_property(marker, "modulate", Color(1, 1, 1, 0), 0.45)
+	tween.finished.connect(marker.queue_free)
+
+
 func start_player_path(path: Array[Vector2i]) -> void:
 	if path.is_empty() or not player:
 		return
@@ -952,6 +987,7 @@ func _update_preview_validation(cell: Vector2i, ignore_id: String = "") -> void:
 
 
 func _finish_move_preview(restore_selection: bool) -> void:
+	var selection_id := selected_furniture_id
 	selected_catalog_type = ""
 	has_active_preview = false
 	preview_furniture_type = ""
@@ -960,8 +996,8 @@ func _finish_move_preview(restore_selection: bool) -> void:
 		preview_node = null
 	moving_furniture_id = ""
 	moving_furniture_original_data.clear()
-	if not restore_selection:
-		return
+	if restore_selection and not selection_id.is_empty() and furniture_renderer:
+		furniture_renderer.select_furniture(selection_id)
 
 
 func _apply_decoration_npc_visibility() -> void:
@@ -1105,6 +1141,8 @@ func _parse_furniture_save_list(saved_furniture: Array) -> Array:
 		if typeof(entry) != TYPE_DICTIONARY:
 			continue
 		var furniture_type := String(entry.get("type", "chair"))
+		if FurnitureCatalogScript.get_item(furniture_type).is_empty():
+			continue
 		result.append({
 			"id": String(entry.get("id", _make_furniture_id())),
 			"type": furniture_type,

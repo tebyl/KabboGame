@@ -8,6 +8,13 @@ const ORTHOGONAL_DIRECTIONS := [
 	Vector2i(0, -1),
 ]
 
+const DIAGONAL_DIRECTIONS := [
+	Vector2i(1, 1),
+	Vector2i(1, -1),
+	Vector2i(-1, 1),
+	Vector2i(-1, -1),
+]
+
 
 static func find_path(
 	start: Vector2i,
@@ -53,6 +60,16 @@ static func get_neighbors(cell: Vector2i, room_size: Vector2i, blocked_cells: Di
 		var next: Vector2i = cell + direction
 		if is_inside(next, room_size) and not is_blocked(next, blocked_cells):
 			neighbors.append(next)
+	for direction in DIAGONAL_DIRECTIONS:
+		var next: Vector2i = cell + direction
+		if not is_inside(next, room_size) or is_blocked(next, blocked_cells):
+			continue
+		# Prevent corner cutting when adjacent orthogonal cells are blocked.
+		var step_x := cell + Vector2i(direction.x, 0)
+		var step_y := cell + Vector2i(0, direction.y)
+		if is_blocked(step_x, blocked_cells) or is_blocked(step_y, blocked_cells):
+			continue
+		neighbors.append(next)
 	return neighbors
 
 

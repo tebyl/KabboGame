@@ -23,24 +23,33 @@ func _ready() -> void:
 
 func setup_inventory(initial_inventory: Dictionary) -> void:
 	inventory = initial_inventory.duplicate(true)
+	_build_categories()
 	var categories := FurnitureCatalogScript.get_categories()
-	if current_category.is_empty() and not categories.is_empty():
-		current_category = String(categories[0])
-	populate_category(current_category)
+	if current_category.is_empty() or _count_items_in_category(current_category) == 0:
+		var preferred := _find_first_category_with_items(categories)
+		current_category = preferred if not preferred.is_empty() else String(categories[0]) if not categories.is_empty() else ""
+	if not current_category.is_empty():
+		populate_category(current_category)
 
 
 func update_inventory(next_inventory: Dictionary) -> void:
 	inventory = next_inventory.duplicate(true)
+	if not selected_furniture_type.is_empty() and int(inventory.get(selected_furniture_type, 0)) <= 0:
+		selected_furniture_type = ""
+	_build_categories()
 	if not current_category.is_empty():
 		populate_category(current_category)
 
 
 func show_inventory() -> void:
 	panel.visible = true
+	_build_categories()
 	if item_list.get_child_count() == 0:
 		var categories := FurnitureCatalogScript.get_categories()
 		if not categories.is_empty():
 			populate_category(String(categories[0]))
+	elif not current_category.is_empty():
+		populate_category(current_category)
 
 
 func hide_inventory() -> void:
@@ -87,12 +96,29 @@ func _build_categories() -> void:
 		child.queue_free()
 
 	for category in FurnitureCatalogScript.get_categories():
+		var count := _count_items_in_category(String(category))
 		var button := Button.new()
-		button.text = String(category)
+		button.text = "%s (%s)" % [String(category), count]
 		button.custom_minimum_size = Vector2(120, 30)
 		UIThemeScript.apply_secondary_button(button)
+		button.disabled = count == 0
 		button.pressed.connect(populate_category.bind(String(category)))
 		category_list.add_child(button)
+
+
+func _count_items_in_category(category: String) -> int:
+	var total := 0
+	for item in FurnitureCatalogScript.get_items_by_category(category):
+		var item_type := String(item.get("type", ""))
+		total += max(0, int(inventory.get(item_type, 0)))
+	return total
+
+
+func _find_first_category_with_items(categories: Array) -> String:
+	for category in categories:
+		if _count_items_in_category(String(category)) > 0:
+			return String(category)
+	return ""
 
 
 func _on_item_pressed(furniture_type: String) -> void:

@@ -2,20 +2,51 @@ class_name SaveManager
 extends RefCounted
 
 const SAVE_PATH := "user://save.json"
+const SAVE_TMP_PATH := "user://save.tmp"
+const SAVE_BACKUP_PATH := "user://save_prev.json"
+const SAVE_FILE_NAME := "save.json"
+const SAVE_TMP_NAME := "save.tmp"
+const SAVE_BACKUP_NAME := "save_prev.json"
 
 static var last_load_had_corrupt_save := false
 static var last_corrupt_backup_path := ""
 
 
 static func save_game(data: Dictionary) -> void:
-	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	var file := FileAccess.open(SAVE_TMP_PATH, FileAccess.WRITE)
 	if not file:
-		push_warning("SaveManager: no se pudo abrir save para escritura: %s" % FileAccess.get_open_error())
+		push_warning("SaveManager: no se pudo abrir save temporal para escritura: %s" % FileAccess.get_open_error())
 		return
 
 	var json := JSON.stringify(data, "\t")
 	file.store_string(json)
 	file.close()
+
+	var dir := DirAccess.open("user://")
+	if not dir:
+		push_warning("SaveManager: no se pudo abrir user:// para guardar.")
+		return
+
+	var backup_name := ""
+	if FileAccess.file_exists(SAVE_PATH):
+		backup_name = SAVE_BACKUP_NAME
+		if FileAccess.file_exists(SAVE_BACKUP_PATH):
+			var remove_error := dir.remove(SAVE_BACKUP_NAME)
+			if remove_error != OK:
+				var timestamp := Time.get_datetime_string_from_system(false, true).replace(":", "").replace("-", "").replace("T", "_")
+				backup_name = "save_prev_%s.json" % timestamp
+		var rename_error := dir.rename(SAVE_FILE_NAME, backup_name)
+		if rename_error != OK:
+			push_warning("SaveManager: no se pudo crear backup del save: %s" % rename_error)
+			return
+
+	var replace_error := dir.rename(SAVE_TMP_NAME, SAVE_FILE_NAME)
+	if replace_error != OK:
+		push_warning("SaveManager: no se pudo reemplazar save: %s" % replace_error)
+		if not backup_name.is_empty():
+			var restore_error := dir.rename(backup_name, SAVE_FILE_NAME)
+			if restore_error != OK:
+				push_warning("SaveManager: no se pudo restaurar backup: %s" % restore_error)
 
 
 static func load_game() -> Dictionary:
