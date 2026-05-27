@@ -21,8 +21,8 @@ const SENDER_COLORS := {
 	"Sistema": "9db8d6",
 }
 
-var minimized := false
-var last_message_text := "Chat"
+var minimized: bool = false
+var last_message_text: String = "Chat"
 var counter_label: Label
 
 @onready var chat_card: PanelContainer = $Root/ChatCard
@@ -56,11 +56,11 @@ func set_messages(messages: Array) -> void:
 
 
 func add_message(message: Dictionary) -> void:
-	var sender := String(message.get("sender", "Invitado"))
-	var text := String(message.get("text", ""))
+	var sender: String = String(message.get("sender", "Invitado"))
+	var text: String = String(message.get("text", ""))
 	last_message_text = "%s: %s" % [sender, text]
 	minimized_label.text = last_message_text
-	var rich_label := RichTextLabel.new()
+	var rich_label: RichTextLabel = RichTextLabel.new()
 	rich_label.bbcode_enabled = true
 	rich_label.fit_content = true
 	rich_label.scroll_active = false
@@ -141,7 +141,7 @@ func _setup_counter_label() -> void:
 	counter_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	counter_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	input_row.add_child(counter_label)
-	var send_index := input_row.get_children().find(send_button)
+	var send_index: int = input_row.get_children().find(send_button)
 	if send_index != -1:
 		input_row.move_child(counter_label, send_index)
 
@@ -149,7 +149,7 @@ func _setup_counter_label() -> void:
 func _update_input_state() -> void:
 	if not counter_label:
 		return
-	var length := chat_input.text.strip_edges().length()
+	var length: int = chat_input.text.strip_edges().length()
 	counter_label.text = "%s/%s" % [length, MAX_TEXT_LENGTH]
 	send_button.disabled = length == 0
 
@@ -175,9 +175,18 @@ func _apply_minimized_state() -> void:
 
 func _apply_premium_chat_styles() -> void:
 	chat_card.add_theme_stylebox_override("panel", _make_premium_stylebox(COLOR_CHAT_BG, 2, COLOR_CHAT_BORDER, 3))
-	UIThemeScript.apply_texture_panel_style(chat_card, "chat_panel_9slice", 8)
+	UIThemeScript.apply_texture_panel_style(chat_card, "panel_dark_9slice", 8)
 	chat_card.offset_left = 14.0
-	chat_card.offset_bottom = -14.0
+	chat_card.offset_bottom = -16.0
+	var margin: MarginContainer = $Root/ChatCard/Margin
+	margin.add_theme_constant_override("margin_left", 12)
+	margin.add_theme_constant_override("margin_top", 10)
+	margin.add_theme_constant_override("margin_right", 12)
+	margin.add_theme_constant_override("margin_bottom", 12)
+	var vbox: VBoxContainer = $Root/ChatCard/Margin/VBox
+	vbox.add_theme_constant_override("separation", 8)
+	var header: HBoxContainer = $Root/ChatCard/Margin/VBox/Header
+	header.add_theme_constant_override("separation", 8)
 	_add_header_icon()
 	title_label.text = "Chat"
 	title_label.add_theme_color_override("font_color", COLOR_CHAT_TEXT)
@@ -206,16 +215,17 @@ func _apply_premium_chat_styles() -> void:
 	message_scroll.get_v_scroll_bar().add_theme_stylebox_override("grabber", _make_premium_stylebox(COLOR_CHAT_BORDER.darkened(0.10), 2, COLOR_CHAT_BORDER, 1))
 	message_list.add_theme_constant_override("separation", 5)
 	input_row.add_theme_constant_override("separation", 8)
+	input_row.custom_minimum_size = Vector2(0, 42)
 
 
 func _add_header_icon() -> void:
 	var header: HBoxContainer = $Root/ChatCard/Margin/VBox/Header
 	if header.has_node("ChatIcon"):
 		return
-	var texture := UIThemeScript.load_ui_texture("res://assets/ui/icons/icon_chat.png")
+	var texture: Texture2D = UIThemeScript.load_ui_texture("res://assets/ui/icons/icon_chat.png")
 	if not texture:
 		return
-	var icon := TextureRect.new()
+	var icon: TextureRect = TextureRect.new()
 	icon.name = "ChatIcon"
 	icon.texture = texture
 	icon.custom_minimum_size = Vector2(32, 32)
@@ -235,7 +245,7 @@ func _style_premium_button(button: Button, color: Color) -> void:
 
 
 func _make_premium_stylebox(color: Color, radius: int, border_color: Color, border_width: int) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
+	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = color
 	style.corner_radius_top_left = radius
 	style.corner_radius_top_right = radius
@@ -256,8 +266,8 @@ func _make_premium_stylebox(color: Color, radius: int, border_color: Color, bord
 func _get_sender_color(sender: String) -> String:
 	if SENDER_COLORS.has(sender):
 		return String(SENDER_COLORS[sender])
-	var hash_value := abs(sender.hash())
-	var palette := ["ffd86b", "66f3ff", "ff8acb", "a8ff8a", "c8a2ff"]
+	var hash_value: int = absi(sender.hash())
+	var palette: PackedStringArray = PackedStringArray(["ffd86b", "66f3ff", "ff8acb", "a8ff8a", "c8a2ff"])
 	return palette[hash_value % palette.size()]
 
 

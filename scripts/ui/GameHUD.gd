@@ -72,7 +72,7 @@ func set_player_name(player_name: String) -> void:
 func set_coins(value: int) -> void:
 	if not is_node_ready():
 		await ready
-	coins_label.text = "Monedas: %s" % value
+	_set_badge_content_text(coins_label, "CoinBadgeText", "Monedas: %s" % value)
 
 
 func set_claimable_missions_count(count: int) -> void:
@@ -97,8 +97,8 @@ func set_decoration_enabled(enabled: bool) -> void:
 func set_room_role(role: String) -> void:
 	if not is_node_ready():
 		await ready
-	var safe_role := PermissionManagerScript.sanitize_role(role)
-	role_label.text = "Dueño" if safe_role == PermissionManagerScript.ROLE_OWNER else "Visitante"
+	var safe_role: String = PermissionManagerScript.sanitize_role(role)
+	_set_badge_content_text(role_label, "RoleBadgeText", "Dueño" if safe_role == PermissionManagerScript.ROLE_OWNER else "Visitante")
 
 
 func set_decorate_available(available: bool) -> void:
@@ -163,7 +163,7 @@ func _on_settings_button_pressed() -> void:
 
 
 func _setup_menu() -> void:
-	var popup := menu_button.get_popup()
+	var popup: PopupMenu = menu_button.get_popup()
 	popup.clear()
 	_apply_premium_popup_style(popup)
 	popup.add_item("Información de sala", 1)
@@ -221,13 +221,13 @@ func _on_menu_id_pressed(id: int) -> void:
 func _get_version_summary() -> String:
 	if not FileAccess.file_exists(VERSION_PATH):
 		return "KabboLike Demo"
-	var file := FileAccess.open(VERSION_PATH, FileAccess.READ)
+	var file: FileAccess = FileAccess.open(VERSION_PATH, FileAccess.READ)
 	if not file:
 		return "KabboLike Demo"
-	var version := ""
-	var build := ""
+	var version: String = ""
+	var build: String = ""
 	while not file.eof_reached():
-		var line := file.get_line()
+		var line: String = file.get_line()
 		if line.begins_with("Version:"):
 			version = line.replace("Version:", "").strip_edges()
 		elif line.begins_with("Build:"):
@@ -255,11 +255,16 @@ func show_message(text: String) -> void:
 
 func _apply_styles() -> void:
 	_apply_premium_top_bar()
+	_ensure_top_bar_icon("RoomIcon", "home", room_name_label, Vector2(34, 34))
+	_remove_top_bar_extra("OwnerIcon")
+	_remove_top_bar_extra("CoinIcon")
 	for label in [room_name_label, role_label, coins_label, help_text, saved_label, message_label]:
 		_apply_premium_label(label)
 	_style_header_label(room_name_label)
 	_style_badge_label(role_label, COLOR_HUD_GOLD)
 	_style_badge_label(coins_label, COLOR_HUD_GOLD)
+	_setup_badge_content(role_label, "RoleBadgeContent", "", "RoleBadgeText", "Dueño")
+	_setup_badge_content(coins_label, "CoinBadgeContent", "res://assets/ui/icons/icon_coin.png", "CoinBadgeText", coins_label.text.strip_edges())
 	for button in $Root/TopBar/MarginContainer/HBoxContainer.get_children():
 		if button is Button:
 			_style_premium_button(button, COLOR_HUD_BUTTON)
@@ -306,10 +311,83 @@ func _style_header_label(label: Label) -> void:
 
 
 func _style_badge_label(label: Label, accent: Color) -> void:
-	label.custom_minimum_size = Vector2(132, 42)
+	label.custom_minimum_size = Vector2(176, 42) if label == coins_label else Vector2(124, 42)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.add_theme_font_size_override("font_size", 17)
 	label.add_theme_stylebox_override("normal", _make_premium_stylebox(COLOR_HUD_BUTTON, 2, accent, 2))
+	var badge_texture: Texture2D = UIThemeScript.load_ui_texture("res://assets/ui/buttons/btn_yellow_normal.png")
+	if badge_texture:
+		label.add_theme_stylebox_override("normal", UIThemeScript.make_texture_style(badge_texture, 8))
+
+
+func _ensure_top_bar_icon(node_name: String, icon_name: String, before_node: Control, size: Vector2) -> void:
+	var row: HBoxContainer = $Root/TopBar/MarginContainer/HBoxContainer
+	if row.has_node(node_name):
+		return
+	var icon: TextureRect = UIThemeScript.make_icon(icon_name, size)
+	_add_top_bar_icon(row, icon, node_name, before_node)
+
+
+func _remove_top_bar_extra(node_name: String) -> void:
+	var row: HBoxContainer = $Root/TopBar/MarginContainer/HBoxContainer
+	if row.has_node(node_name):
+		row.get_node(node_name).queue_free()
+
+
+func _setup_badge_content(label: Label, content_name: String, icon_path: String, text_name: String, text: String) -> void:
+	label.text = ""
+	if label.has_node(content_name):
+		_set_badge_content_text(label, text_name, text)
+		return
+	var content: HBoxContainer = HBoxContainer.new()
+	content.name = content_name
+	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.set_anchors_preset(Control.PRESET_FULL_RECT)
+	content.offset_left = 12.0
+	content.offset_top = 0.0
+	content.offset_right = -12.0
+	content.offset_bottom = 0.0
+	content.alignment = BoxContainer.ALIGNMENT_CENTER
+	content.add_theme_constant_override("separation", 7)
+	label.add_child(content)
+	if not icon_path.is_empty():
+		var texture: Texture2D = UIThemeScript.load_ui_texture(icon_path)
+		if texture:
+			var icon: TextureRect = TextureRect.new()
+			icon.texture = texture
+			icon.custom_minimum_size = Vector2(22, 22)
+			icon.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
+			content.add_child(icon)
+	var text_label: Label = Label.new()
+	text_label.name = text_name
+	text_label.text = text
+	text_label.add_theme_color_override("font_color", COLOR_HUD_TEXT)
+	text_label.add_theme_font_size_override("font_size", 17)
+	text_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	content.add_child(text_label)
+
+
+func _set_badge_content_text(label: Label, text_name: String, text: String) -> void:
+	if label.has_node("RoleBadgeContent/%s" % text_name):
+		var role_text: Label = label.get_node("RoleBadgeContent/%s" % text_name) as Label
+		role_text.text = text
+		label.text = ""
+	elif label.has_node("CoinBadgeContent/%s" % text_name):
+		var coin_text: Label = label.get_node("CoinBadgeContent/%s" % text_name) as Label
+		coin_text.text = text
+		label.text = ""
+	else:
+		label.text = text
+
+
+func _add_top_bar_icon(row: HBoxContainer, icon: TextureRect, node_name: String, before_node: Control) -> void:
+	if not icon:
+		return
+	icon.name = node_name
+	row.add_child(icon)
+	var target_index: int = row.get_children().find(before_node)
+	if target_index >= 0:
+		row.move_child(icon, target_index)
 
 
 func _style_premium_button(button: Button, color: Color, texture_variant: String = "blue") -> void:
@@ -334,7 +412,7 @@ func _apply_decorate_button_state(enabled: bool) -> void:
 func _apply_premium_popup_style(popup: PopupMenu) -> void:
 	popup.min_size = Vector2i(300, 0)
 	popup.add_theme_stylebox_override("panel", _make_premium_stylebox(COLOR_HUD_BG_DARK, 2, COLOR_HUD_BORDER, 3))
-	var popup_panel_texture := UIThemeScript.load_ui_texture("res://assets/ui/panels/panel_dark_9slice.png")
+	var popup_panel_texture: Texture2D = UIThemeScript.load_ui_texture("res://assets/ui/panels/panel_dark_9slice.png")
 	if popup_panel_texture:
 		popup.add_theme_stylebox_override("panel", UIThemeScript.make_texture_style(popup_panel_texture, 8))
 	popup.add_theme_stylebox_override("hover", _make_premium_stylebox(COLOR_HUD_BUTTON_HOT.darkened(0.12), 2, COLOR_HUD_GOLD, 1))
@@ -349,7 +427,7 @@ func _apply_premium_popup_style(popup: PopupMenu) -> void:
 
 
 func _make_premium_stylebox(color: Color, radius: int, border_color: Color, border_width: int) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
+	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = color
 	style.corner_radius_top_left = radius
 	style.corner_radius_top_right = radius

@@ -40,7 +40,7 @@ static func apply_success_button(button: Button) -> void:
 
 
 static func apply_texture_panel_style(panel: PanelContainer, panel_name: String, margin: int = TEXTURE_MARGIN_DEFAULT) -> bool:
-	var texture := load_ui_texture("%s/panels/%s.png" % [UI_ASSET_ROOT, panel_name])
+	var texture: Texture2D = load_ui_texture("%s/panels/%s.png" % [UI_ASSET_ROOT, panel_name])
 	if not texture:
 		return false
 	panel.add_theme_stylebox_override("panel", make_texture_style(texture, margin))
@@ -48,17 +48,21 @@ static func apply_texture_panel_style(panel: PanelContainer, panel_name: String,
 
 
 static func apply_texture_button_style(button: Button, variant: String, margin: int = TEXTURE_MARGIN_DEFAULT) -> bool:
-	var applied := false
+	var applied: bool = false
 	for state in ["normal", "hover", "pressed", "disabled"]:
-		var texture := load_ui_texture("%s/buttons/btn_%s_%s.png" % [UI_ASSET_ROOT, variant, state])
+		var texture: Texture2D = load_ui_texture("%s/buttons/btn_%s_%s.png" % [UI_ASSET_ROOT, variant, state])
 		if texture:
 			button.add_theme_stylebox_override(state, make_texture_style(texture, margin))
 			applied = true
+	button.add_theme_color_override("font_color", COLOR_TEXT)
+	button.add_theme_color_override("font_hover_color", COLOR_TEXT)
+	button.add_theme_color_override("font_pressed_color", COLOR_TEXT)
+	button.add_theme_color_override("font_disabled_color", COLOR_TEXT_MUTED)
 	return applied
 
 
 static func apply_button_icon(button: Button, icon_name: String) -> bool:
-	var texture := load_ui_texture("%s/icons/icon_%s.png" % [UI_ASSET_ROOT, icon_name])
+	var texture: Texture2D = load_ui_texture("%s/icons/icon_%s.png" % [UI_ASSET_ROOT, icon_name])
 	if not texture:
 		return false
 	button.icon = texture
@@ -66,15 +70,35 @@ static func apply_button_icon(button: Button, icon_name: String) -> bool:
 	return true
 
 
-static func load_ui_texture(path: String) -> Texture2D:
-	if not ResourceLoader.exists(path):
+static func make_icon(icon_name: String, size: Vector2 = Vector2(24, 24)) -> TextureRect:
+	var texture: Texture2D = load_ui_texture("%s/icons/icon_%s.png" % [UI_ASSET_ROOT, icon_name])
+	return make_texture_rect(texture, size)
+
+
+static func make_asset_texture_rect(path: String, size: Vector2 = Vector2(24, 24)) -> TextureRect:
+	var texture: Texture2D = load_ui_texture(path)
+	return make_texture_rect(texture, size)
+
+
+static func make_texture_rect(texture: Texture2D, size: Vector2 = Vector2(24, 24)) -> TextureRect:
+	if not texture:
 		return null
-	var resource := load(path)
+	var icon: TextureRect = TextureRect.new()
+	icon.texture = texture
+	icon.custom_minimum_size = size
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
+	return icon
+
+
+static func load_ui_texture(path: String) -> Texture2D:
+	if not ResourceLoader.exists(path) and not FileAccess.file_exists(path):
+		return null
+	var resource: Resource = load(path)
 	return resource as Texture2D
 
 
 static func make_texture_style(texture: Texture2D, margin: int = TEXTURE_MARGIN_DEFAULT) -> StyleBoxTexture:
-	var style := StyleBoxTexture.new()
+	var style: StyleBoxTexture = StyleBoxTexture.new()
 	style.texture = texture
 	style.texture_margin_left = margin
 	style.texture_margin_top = margin
@@ -111,7 +135,7 @@ static func _apply_button_style(button: Button, color: Color) -> void:
 
 
 static func _make_stylebox(color: Color, radius: int, border_color: Color, border_width: int) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
+	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = color
 	style.corner_radius_top_left = radius
 	style.corner_radius_top_right = radius
